@@ -21,6 +21,11 @@ public class HelpdeskDbContext : DbContext
             entity.Property(t => t.Title).IsRequired().HasMaxLength(150);
             entity.Property(t => t.Category).IsRequired().HasMaxLength(50);
             entity.Property(t => t.Priority).IsRequired().HasMaxLength(50);
+            entity.Property(t => t.CreatedByClientId).IsRequired().HasMaxLength(100);
+            entity.Property(t => t.State)
+                .HasConversion<string>()
+                .HasMaxLength(20);
+            entity.HasIndex(t => new { t.CreatedByClientId, t.CreationDate });
         });
     }
 }

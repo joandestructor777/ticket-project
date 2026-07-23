@@ -31,6 +31,21 @@ public class TicketRepository : ITicketRepository
             .ToListAsync();
     }
 
+    public async Task AddAsync(Ticket ticket, CancellationToken cancellationToken = default)
+    {
+        await _context.Tickets.AddAsync(ticket, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Ticket>> GetByClientIdAsync(string clientId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Tickets
+            .AsNoTracking()
+            .Where(ticket => ticket.CreatedByClientId == clientId)
+            .OrderByDescending(ticket => ticket.CreationDate)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task UpdateAsync(Ticket ticket)
     {
         _context.Tickets.Update(ticket);

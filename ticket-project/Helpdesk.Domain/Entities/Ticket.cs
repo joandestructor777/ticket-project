@@ -11,6 +11,7 @@ namespace Helpdesk.Domain.Entities
         public string Description { get; set; } = string.Empty;
         public string Category { get; set; } = string.Empty;
         public string Priority { get; set; } = string.Empty;
+        public string CreatedByClientId { get; set; } = string.Empty;
         public TicketState State { get; set; } = TicketState.Opened;
         public DateTime CreationDate { get; set; } = DateTime.UtcNow;
         public DateTime LimitDateSLA { get; set; }

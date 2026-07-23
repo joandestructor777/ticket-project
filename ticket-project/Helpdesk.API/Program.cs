@@ -1,4 +1,5 @@
 using Helpdesk.Application.Interfaces;
+using Helpdesk.Application.Models;
 using Helpdesk.Application.Services;
 using Helpdesk.Domain.Interfaces;
 using Helpdesk.Infrastructure.Data;
@@ -9,11 +10,21 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? ["http://localhost:3000"];
+builder.Services.AddCors(options => options.AddPolicy("frontend", policy => policy
+    .WithOrigins(allowedOrigins)
+    .AllowAnyHeader()
+    .AllowAnyMethod()));
 
 builder.Services.AddDbContext<HelpdeskDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+var slaOptions = builder.Configuration.GetSection(SlaOptions.SectionName).Get<SlaOptions>() ?? new SlaOptions();
+builder.Services.AddSingleton(slaOptions);
+builder.Services.AddScoped<IClientTicketService, ClientTicketService>();
 
 builder.Services.AddScoped<ISlaMonitorService, SlaMonitorService>();
 
@@ -21,6 +32,12 @@ builder.Services.AddHostedService<SlaMonitorWorker>();
 
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+app.UseCors("frontend");
 app.UseAuthorization();
 app.MapControllers();
 
