@@ -1,0 +1,53 @@
+using Helpdesk.Application.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Helpdesk.API.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class TicketsController : ControllerBase
+{
+    private readonly ITicketService _ticketService;
+
+    public TicketsController(ITicketService ticketService)
+    {
+        _ticketService = ticketService;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetTickets()
+    {
+        try
+        {
+            var tickets = await _ticketService.GetAllTicketsAsync();
+            // Note: Returning tickets directly. In a real app we'd map to a DTO.
+            return Ok(tickets);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
+    }
+
+    public class ReopenRequest
+    {
+        public string Justification { get; set; } = string.Empty;
+    }
+
+    [HttpPost("{id}/reopen")]
+    public async Task<IActionResult> ReopenTicket(Guid id, [FromBody] ReopenRequest request)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(request.Justification))
+                return BadRequest(new { error = "La justificación es requerida para reabrir un ticket." });
+
+            var ticket = await _ticketService.ReopenTicketAsync(id, request.Justification);
+            return Ok(ticket);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+}

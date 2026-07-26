@@ -1,4 +1,4 @@
-﻿using Helpdesk.Domain.Entities;
+using Helpdesk.Domain.Entities;
 using Helpdesk.Domain.Enums;
 using Helpdesk.Domain.Interfaces;
 using Helpdesk.Infrastructure.Data;
@@ -15,6 +15,16 @@ public class TicketRepository : ITicketRepository
         _context = context;
     }
 
+    public async Task<Ticket?> GetByIdAsync(Guid id)
+    {
+        return await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
+    }
+
+    public async Task<IEnumerable<Ticket>> GetAllAsync()
+    {
+        return await _context.Tickets.ToListAsync();
+    }
+
     public async Task<IEnumerable<Ticket>> GetActiveTicketsWithExpiredSlaAsync(DateTime actualTime)
     {
         var monitorizedStates = new[]
@@ -29,6 +39,21 @@ public class TicketRepository : ITicketRepository
             .Where(t => monitorizedStates.Contains(t.State)
                         && t.LimitDateSLA < actualTime)
             .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Ticket>> GetResolvedTicketsPastGracePeriodAsync(DateTime limitTime)
+    {
+        return await _context.Tickets
+            .Where(t => t.State == TicketState.Resolved 
+                        && t.ResolutionDate.HasValue 
+                        && t.ResolutionDate.Value < limitTime)
+            .ToListAsync();
+    }
+
+    public async Task<string?> GetSystemSettingAsync(string key)
+    {
+        var setting = await _context.SystemSettings.FirstOrDefaultAsync(s => s.Key == key);
+        return setting?.Value;
     }
 
     public async Task UpdateAsync(Ticket ticket)

@@ -1,4 +1,4 @@
-﻿using Helpdesk.Application.Interfaces;
+using Helpdesk.Application.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -29,6 +29,7 @@ public class SlaMonitorWorker : BackgroundService
                 {
                     var slaService = scope.ServiceProvider.GetRequiredService<ISlaMonitorService>();
                     await slaService.ProcessExpireTicketsAsync();
+                    await slaService.ProcessGracePeriodTicketsAsync();
                 }
             }
             catch (Exception ex)

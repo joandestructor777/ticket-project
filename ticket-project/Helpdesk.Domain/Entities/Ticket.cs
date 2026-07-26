@@ -1,4 +1,4 @@
-﻿
+
 
 using Helpdesk.Domain.Enums;
 
@@ -15,7 +15,8 @@ namespace Helpdesk.Domain.Entities
         public DateTime CreationDate { get; set; } = DateTime.UtcNow;
         public DateTime LimitDateSLA { get; set; }
         public DateTime? ResolutionDate { get; set; }
-
+        public int? TechnicianId { get; set; }
+        public string? ReopenJustification { get; set; }
         public Boolean RegisteredExpirationAlert { get; set; }
         public string? LogAlert { get; set; }
         public void MarkAsDefeated(string reason)
