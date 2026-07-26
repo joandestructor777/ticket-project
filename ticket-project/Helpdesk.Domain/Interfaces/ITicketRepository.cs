@@ -10,4 +10,7 @@ public interface ITicketRepository
     Task<IEnumerable<Ticket>> GetResolvedTicketsPastGracePeriodAsync(DateTime limitTime);
     Task<string?> GetSystemSettingAsync(string key);
     Task UpdateAsync(Ticket ticket);
+    Task<Technician?> GetTechnicianByIdAsync(int id);
+    Task<IEnumerable<Ticket>> GetTicketsByTechnicianIdAsync(int technicianId);
+    Task<int> GetOpenTicketsCountByTechnicianAsync(int technicianId);
 }

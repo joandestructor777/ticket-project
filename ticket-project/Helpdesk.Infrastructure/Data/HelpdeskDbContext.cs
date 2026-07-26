@@ -11,6 +11,7 @@ public class HelpdeskDbContext : DbContext
 
     public DbSet<Ticket> Tickets => Set<Ticket>();
     public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
+    public DbSet<Technician> Technicians => Set<Technician>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

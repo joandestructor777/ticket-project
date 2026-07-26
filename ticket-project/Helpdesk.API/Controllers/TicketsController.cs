@@ -29,11 +29,6 @@ public class TicketsController : ControllerBase
         }
     }
 
-    public class ReopenRequest
-    {
-        public string Justification { get; set; } = string.Empty;
-    }
-
     [HttpPost("{id}/reopen")]
     public async Task<IActionResult> ReopenTicket(Guid id, [FromBody] ReopenRequest request)
     {

@@ -32,5 +32,39 @@ export const ticketService = {
       console.error('Error reopening ticket:', error);
       throw error;
     }
+  },
+
+  getTicketsByTechnician: async (technicianId) => {
+    const response = await fetch(`${API_URL}/technician/${technicianId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch technician tickets');
+    }
+    return await response.json();
+  },
+
+  assignTicket: async (ticketId, technicianId) => {
+    const response = await fetch(`${API_URL}/${ticketId}/assign/${technicianId}`, {
+      method: 'PUT'
+    });
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.message || 'Error al asignar el ticket');
+    }
+    return await response.json();
+  },
+
+  updateTicketStatus: async (ticketId, stateCode, resolutionComment) => {
+    const response = await fetch(`${API_URL}/${ticketId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ state: stateCode, resolutionComment })
+    });
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.message || 'Error al actualizar el ticket');
+    }
+    return await response.json();
   }
 };

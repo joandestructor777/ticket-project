@@ -61,4 +61,23 @@ public class TicketRepository : ITicketRepository
         _context.Tickets.Update(ticket);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<Technician?> GetTechnicianByIdAsync(int id)
+    {
+        return await _context.Technicians.FirstOrDefaultAsync(t => t.Id == id);
+    }
+
+    public async Task<IEnumerable<Ticket>> GetTicketsByTechnicianIdAsync(int technicianId)
+    {
+        return await _context.Tickets
+            .Where(t => t.TechnicianId == technicianId)
+            .ToListAsync();
+    }
+
+    public async Task<int> GetOpenTicketsCountByTechnicianAsync(int technicianId)
+    {
+        var activeStates = new[] { TicketState.Opened, TicketState.Assigned, TicketState.OnProcess, TicketState.Reopened };
+        return await _context.Tickets
+            .CountAsync(t => t.TechnicianId == technicianId && activeStates.Contains(t.State));
+    }
 }

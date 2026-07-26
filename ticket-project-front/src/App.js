@@ -1,46 +1,43 @@
 import React from 'react';
+import Header from './shared/components/Header';
 import SupervisorDashboard from './features/supervisor/components/SupervisorDashboard';
+import TechnicianDashboard from './features/technician/components/TechnicianDashboard';
+import './index.css';
 
 function App() {
+  const [activeTab, setActiveTab] = React.useState('supervisor');
+
   return (
-    <div className="App">
-      {/* Barra de navegación superior minimalista corporativa */}
-      <nav 
-        style={{
-          background: '#ffffff',
-          borderBottom: '1px solid var(--border-color)',
-          position: 'sticky',
-          top: 0,
-          zIndex: 100,
-          padding: '16px 20px'
-        }}
-      >
-        <div 
-          style={{
-            maxWidth: '1200px',
-            margin: '0 auto',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span style={{ fontWeight: '700', fontSize: '1.1rem', color: 'var(--text-main)' }}>
-              Helpdesk
-            </span>
+    <div className="app-container">
+      <Header />
+      <main className="main-content">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+          <div>
+            <h2 style={{ margin: '0 0 8px 0', fontSize: '1.5rem', color: 'var(--text-main)' }}>
+              {activeTab === 'supervisor' ? 'Panel de Control de SLAs' : 'Portal de Técnicos'}
+            </h2>
+            <p style={{ margin: 0, color: 'var(--text-muted)' }}>
+              {activeTab === 'supervisor' ? 'Monitoreo y gestión de tiempos límite (SLA) de tickets de soporte.' : 'Gestión de tickets asignados y flujo de resolución.'}
+            </p>
           </div>
           <div style={{ display: 'flex', gap: '20px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            <span style={{ color: 'var(--primary)', fontWeight: '600', borderBottom: '2px solid var(--primary)', paddingBottom: '4px', cursor: 'pointer' }}>
+            <span 
+              onClick={() => setActiveTab('supervisor')}
+              style={{ color: activeTab === 'supervisor' ? 'var(--primary)' : 'inherit', fontWeight: activeTab === 'supervisor' ? '600' : 'normal', borderBottom: activeTab === 'supervisor' ? '2px solid var(--primary)' : 'none', paddingBottom: '4px', cursor: 'pointer' }}>
               Panel de Supervisor
             </span>
             <span style={{ cursor: 'not-allowed', opacity: 0.5 }}>Portal de Clientes (HU-001)</span>
-            <span style={{ cursor: 'not-allowed', opacity: 0.5 }}>Portal de Técnicos (HU-003)</span>
+            <span 
+              onClick={() => setActiveTab('technician')}
+              style={{ color: activeTab === 'technician' ? 'var(--primary)' : 'inherit', fontWeight: activeTab === 'technician' ? '600' : 'normal', borderBottom: activeTab === 'technician' ? '2px solid var(--primary)' : 'none', paddingBottom: '4px', cursor: 'pointer' }}>
+              Portal de Técnicos (HU-003)
+            </span>
           </div>
         </div>
-      </nav>
 
-      {/* Panel del Supervisor (Dashboard Principal) */}
-      <SupervisorDashboard />
+        {activeTab === 'supervisor' && <SupervisorDashboard />}
+        {activeTab === 'technician' && <TechnicianDashboard />}
+      </main>
     </div>
   );
 }

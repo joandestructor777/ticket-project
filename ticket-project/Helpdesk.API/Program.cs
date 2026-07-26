@@ -25,10 +25,21 @@ builder.Services.AddHostedService<SlaMonitorWorker>();
 
 var app = builder.Build();
 
-// SEEDER: Crear tickets de prueba si la base de datos está vacía
+// SEEDER: Crear técnicos y tickets de prueba si la base de datos está vacía
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<HelpdeskDbContext>();
+    
+    if (!context.Technicians.Any())
+    {
+        context.Technicians.AddRange(
+            new Technician { Name = "Carlos (Red y Hardware)", Specialties = "Red,Hardware", MaxOpenTickets = 3 },
+            new Technician { Name = "Ana (Software)", Specialties = "Software", MaxOpenTickets = 5 },
+            new Technician { Name = "Luis (Todas)", Specialties = "Hardware,Software,Red,Otro", MaxOpenTickets = 4 }
+        );
+        context.SaveChanges();
+    }
+
     if (!context.Tickets.Any())
     {
         context.Tickets.AddRange(
