@@ -1,4 +1,5 @@
 using Helpdesk.Domain.Entities;
+using Helpdesk.Domain.Enums;
 
 namespace Helpdesk.Application.Interfaces;
 

@@ -21,9 +21,7 @@ const SupervisorDashboard = () => {
   const [activeTab, setActiveTab] = useState('list'); // 'list' or 'reports'
 
   const containerStyle = {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '30px 20px',
+    width: '100%',
   };
 
   const headerStyle = {
@@ -84,16 +82,8 @@ const SupervisorDashboard = () => {
 
   return (
     <div style={containerStyle}>
-      {/* Sección de Encabezado */}
-      <div style={headerStyle}>
-        <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)' }}>
-            Panel de Control de SLAs
-          </h1>
-          <p style={{ color: 'var(--text-muted)', marginTop: '2px', fontSize: '0.85rem' }}>
-            Monitoreo y gestión de tiempos límite (SLA) de tickets de soporte.
-          </p>
-        </div>
+      {/* Botón de recarga */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
         <button 
           onClick={refresh}
           disabled={loading}

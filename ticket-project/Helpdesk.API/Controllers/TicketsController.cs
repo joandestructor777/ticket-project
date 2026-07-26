@@ -45,4 +45,50 @@ public class TicketsController : ControllerBase
             return BadRequest(new { error = ex.Message });
         }
     }
+
+    [HttpPut("{id}/assign/{technicianId}")]
+    public async Task<IActionResult> AssignTicket(Guid id, int technicianId)
+    {
+        try
+        {
+            var ticket = await _ticketService.AssignTicketAsync(id, technicianId);
+            return Ok(ticket);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpPut("{id}/status")]
+    public async Task<IActionResult> UpdateTicketStatus(Guid id, [FromBody] StatusUpdateRequest request)
+    {
+        try
+        {
+            var ticket = await _ticketService.UpdateTicketStatusAsync(id, request.State, request.ResolutionComment);
+            return Ok(ticket);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpGet("technician/{technicianId}")]
+    public async Task<IActionResult> GetTicketsByTechnician(int technicianId)
+    {
+        var tickets = await _ticketService.GetTicketsByTechnicianAsync(technicianId);
+        return Ok(tickets);
+    }
+}
+
+public class ReopenRequest
+{
+    public string Justification { get; set; } = string.Empty;
+}
+
+public class StatusUpdateRequest
+{
+    public Helpdesk.Domain.Enums.TicketState State { get; set; }
+    public string? ResolutionComment { get; set; }
 }
