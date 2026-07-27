@@ -1,4 +1,4 @@
-using Helpdesk.Domain.Entities;
+﻿using Helpdesk.Domain.Entities;
 using Helpdesk.Domain.Enums;
 using Helpdesk.Domain.Interfaces;
 using Helpdesk.Infrastructure.Data;
@@ -24,16 +24,28 @@ public sealed class TicketRepository : ITicketRepository
         await _context.Tickets.AsNoTracking().Where(ticket => ticket.CreatedByClientId == clientId)
             .OrderByDescending(ticket => ticket.CreationDate).ToListAsync(cancellationToken);
 
-    public async Task<Ticket?> GetByIdAsync(Guid ticketId, CancellationToken cancellationToken = default) =>
-        await _context.Tickets.SingleOrDefaultAsync(ticket => ticket.Id == ticketId, cancellationToken);
+    public async Task<Ticket?> GetByIdAsync(
+    Guid ticketId,
+    CancellationToken cancellationToken = default) =>
+    await _context.Tickets
+        .Include(ticket => ticket.Comments)
+        .SingleOrDefaultAsync(
+            ticket => ticket.Id == ticketId,
+            cancellationToken);
 
     public async Task<IReadOnlyList<Ticket>> GetOpenTicketsAsync(CancellationToken cancellationToken = default) =>
         await _context.Tickets.AsNoTracking().Where(ticket => ticket.State == TicketState.Opened)
             .OrderBy(ticket => ticket.CreationDate).ToListAsync(cancellationToken);
 
-    public async Task<IReadOnlyList<Ticket>> GetByTechnicianIdAsync(Guid technicianId, CancellationToken cancellationToken = default) =>
-        await _context.Tickets.AsNoTracking().Where(ticket => ticket.AssignedTechnicianId == technicianId)
-            .OrderByDescending(ticket => ticket.CreationDate).ToListAsync(cancellationToken);
+    public async Task<IReadOnlyList<Ticket>> GetByTechnicianIdAsync(
+    Guid technicianId,
+    CancellationToken cancellationToken = default) =>
+    await _context.Tickets
+        .AsNoTracking()
+        .Include(ticket => ticket.Comments)
+        .Where(ticket => ticket.AssignedTechnicianId == technicianId)
+        .OrderByDescending(ticket => ticket.CreationDate)
+        .ToListAsync(cancellationToken);
 
     public async Task<int> CountActiveTicketsByTechnicianIdAsync(Guid technicianId, CancellationToken cancellationToken = default)
     {
@@ -53,9 +65,10 @@ public sealed class TicketRepository : ITicketRepository
     public async Task<string?> GetSystemSettingAsync(string key, CancellationToken cancellationToken = default) =>
         await _context.SystemSettings.Where(setting => setting.Key == key).Select(setting => setting.Value).SingleOrDefaultAsync(cancellationToken);
 
-    public async Task UpdateAsync(Ticket ticket)
+    public async Task UpdateAsync(
+    Ticket ticket,
+    CancellationToken cancellationToken = default)
     {
-        _context.Tickets.Update(ticket);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

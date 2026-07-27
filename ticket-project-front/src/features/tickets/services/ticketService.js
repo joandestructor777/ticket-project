@@ -12,7 +12,5 @@ export const clientTicketService = {
 };
 export const ticketService = {
   getTickets: () => request('/api/tickets'),
-  reopenTicket: (ticketId, justification) => request(`/api/tickets/${ticketId}/reopen`, { method: 'POST', body: JSON.stringify({ justification }) }),
-  getTicketsByTechnician: technicianId => request(`/api/tickets/technician/${technicianId}`),
-  updateTicketStatus: (ticketId, state, resolutionComment) => request(`/api/tickets/${ticketId}/status`, { method: 'PUT', body: JSON.stringify({ state, resolutionComment }) })
+  reopenTicket: (ticketId, justification) => request(`/api/tickets/${ticketId}/reopen`, { method: 'POST', body: JSON.stringify({ justification }) })
 };

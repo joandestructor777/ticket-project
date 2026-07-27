@@ -28,6 +28,7 @@ builder.Services.AddScoped<IClientTicketService, ClientTicketService>();
 builder.Services.AddScoped<IAssignmentService, AssignmentService>();
 builder.Services.AddScoped<ITechnicianManagementService, TechnicianManagementService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
+builder.Services.AddScoped<ITechnicianTicketService, TechnicianTicketService>();
 builder.Services.AddScoped<ISlaMonitorService, SlaMonitorService>();
 
 var slaOptions = builder.Configuration.GetSection(SlaOptions.SectionName).Get<SlaOptions>() ?? new SlaOptions();

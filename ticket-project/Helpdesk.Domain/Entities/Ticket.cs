@@ -1,4 +1,4 @@
-using Helpdesk.Domain.Enums;
+﻿using Helpdesk.Domain.Enums;
 
 namespace Helpdesk.Domain.Entities;
 
@@ -20,6 +20,65 @@ public class Ticket
     public string? ReopenJustification { get; set; }
     public bool RegisteredExpirationAlert { get; set; }
     public string? LogAlert { get; set; }
+    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
+    public ICollection<TicketComment> Comments { get; set; }
+    = new List<TicketComment>();
+
+    public void StartProcess()
+{
+    if (State != TicketState.Assigned &&
+        State != TicketState.Reopened)
+        throw new InvalidOperationException(
+            "Solo los tickets asignados pueden iniciar el proceso de atención.");
+
+    State = TicketState.OnProcess;
+}
+
+public void AddProgressComment(TicketComment comment)
+{
+    if (State != TicketState.OnProcess)
+        throw new InvalidOperationException(
+            "Solo se pueden agregar comentarios de avance a tickets en proceso.");
+
+    RegisterComment(comment, false);
+}
+
+public void Resolve(TicketComment resolutionComment)
+{
+    if (State != TicketState.OnProcess &&
+        State != TicketState.Expired)
+        throw new InvalidOperationException(
+            "Solo los tickets en proceso pueden resolverse.");
+
+    RegisterComment(resolutionComment, true);
+
+    State = TicketState.Resolved;
+    ResolutionDate = DateTime.UtcNow;
+}
+
+public void Close()
+{
+    if (State != TicketState.Resolved)
+        throw new InvalidOperationException(
+            "Solo los tickets resueltos pueden cerrarse.");
+
+    if (!Comments.Any(comment => comment.IsResolution))
+        throw new InvalidOperationException(
+            "Acción bloqueada: Debe registrar al menos un comentario de resolución antes de cerrar el ticket.");
+
+    State = TicketState.Closed;
+}
+
+private void RegisterComment(TicketComment comment, bool isResolution)
+{
+    if (string.IsNullOrWhiteSpace(comment.Content))
+        throw new ArgumentException("El comentario no puede estar vacío.");
+
+    comment.TicketId = Id;
+    comment.IsResolution = isResolution;
+
+    Comments.Add(comment);
+}
 
     public void AssignTo(Guid technicianId)
     {

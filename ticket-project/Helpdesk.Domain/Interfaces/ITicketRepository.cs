@@ -14,5 +14,7 @@ public interface ITicketRepository
     Task<IEnumerable<Ticket>> GetActiveTicketsWithExpiredSlaAsync(DateTime actualTime);
     Task<IEnumerable<Ticket>> GetResolvedTicketsPastGracePeriodAsync(DateTime limitTime);
     Task<string?> GetSystemSettingAsync(string key, CancellationToken cancellationToken = default);
-    Task UpdateAsync(Ticket ticket);
+    Task UpdateAsync(
+    Ticket ticket,
+    CancellationToken cancellationToken = default);
 }

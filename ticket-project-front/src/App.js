@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import ClientDashboard from './features/client/components/ClientDashboard';
 import SupervisorAssignmentDashboard from './features/supervisor/components/SupervisorAssignmentDashboard';
 import SupervisorDashboard from './features/supervisor/components/SupervisorDashboard';
+import TechnicianDashboard from './features/technician/components/TechnicianDashboard';
 import Header from './shared/components/Header';
 import './index.css';
+import './App.css';
 
 function App() {
   const [activePortal, setActivePortal] = useState('reports');
@@ -30,8 +32,28 @@ function App() {
             <button 
               onClick={() => setActivePortal('assignment')}
               style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid var(--border-color)', background: activePortal === 'assignment' ? 'var(--primary)' : '#fff', color: activePortal === 'assignment' ? '#fff' : 'var(--text-main)', cursor: 'pointer', fontWeight: '500' }}>
-              Asignación (HU-002/003)
+              Asignación (HU-002)
             </button>
+            <button
+            onClick={() => setActivePortal('technician')}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '6px',
+              border: '1px solid var(--border-color)',
+              background:
+                activePortal === 'technician'
+                  ? 'var(--primary)'
+                  : '#fff',
+              color:
+                activePortal === 'technician'
+                  ? '#fff'
+                  : 'var(--text-main)',
+              cursor: 'pointer',
+              fontWeight: '500'
+            }}
+          >
+            Portal técnico (HU-003)
+          </button>
             <button 
               onClick={() => setActivePortal('reports')}
               style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid var(--border-color)', background: activePortal === 'reports' ? 'var(--primary)' : '#fff', color: activePortal === 'reports' ? '#fff' : 'var(--text-main)', cursor: 'pointer', fontWeight: '500' }}>
@@ -42,6 +64,7 @@ function App() {
 
         {activePortal === 'client' && <ClientDashboard />}
         {activePortal === 'assignment' && <SupervisorAssignmentDashboard />}
+        {activePortal === 'technician' && <TechnicianDashboard />}
         {activePortal === 'reports' && <SupervisorDashboard />}
       </main>
     </div>

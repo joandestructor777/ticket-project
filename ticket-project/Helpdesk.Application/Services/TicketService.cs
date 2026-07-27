@@ -14,9 +14,6 @@ public sealed class TicketService : ITicketService
     public Task<IReadOnlyList<Ticket>> GetAllTicketsAsync(CancellationToken cancellationToken = default) =>
         _ticketRepository.GetAllAsync(cancellationToken);
 
-    public Task<IReadOnlyList<Ticket>> GetTicketsByTechnicianAsync(Guid technicianId, CancellationToken cancellationToken = default) =>
-        _ticketRepository.GetByTechnicianIdAsync(technicianId, cancellationToken);
-
     public async Task<Ticket> ReopenTicketAsync(Guid ticketId, string justification, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(justification))
@@ -38,35 +35,6 @@ public sealed class TicketService : ITicketService
         ticket.ReopenJustification = justification.Trim();
         ticket.ResolutionDate = null;
 
-        await _ticketRepository.UpdateAsync(ticket);
-        return ticket;
-    }
-
-    public async Task<Ticket> UpdateTicketStatusAsync(Guid ticketId, TicketState newState, string? resolutionComment, CancellationToken cancellationToken = default)
-    {
-        var ticket = await GetTicketAsync(ticketId, cancellationToken);
-
-        if (newState == TicketState.OnProcess && ticket.State != TicketState.Assigned)
-            throw new InvalidOperationException("Solo un ticket asignado puede iniciar proceso.");
-
-        if (newState == TicketState.Resolved)
-        {
-            if (ticket.State is not (TicketState.OnProcess or TicketState.Expired))
-                throw new InvalidOperationException("Solo un ticket en proceso o vencido puede resolverse.");
-            if (string.IsNullOrWhiteSpace(resolutionComment))
-                throw new ArgumentException("El comentario de resolución es obligatorio.");
-
-            ticket.ResolutionComment = resolutionComment.Trim();
-            ticket.ResolutionDate = DateTime.UtcNow;
-        }
-
-        if (newState == TicketState.Closed &&
-            (ticket.State != TicketState.Resolved || string.IsNullOrWhiteSpace(ticket.ResolutionComment)))
-        {
-            throw new InvalidOperationException("No se puede cerrar un ticket sin comentario de resolución.");
-        }
-
-        ticket.State = newState;
         await _ticketRepository.UpdateAsync(ticket);
         return ticket;
     }
