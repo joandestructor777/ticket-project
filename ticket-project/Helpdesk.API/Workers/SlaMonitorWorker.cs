@@ -31,13 +31,25 @@ public class SlaMonitorWorker : BackgroundService
                     await slaService.ProcessExpireTicketsAsync();
                     await slaService.ProcessGracePeriodTicketsAsync();
                 }
+
+                await Task.Delay(TimeSpan.FromSeconds(checkIntervalSeconds), stoppingToken);
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                break;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error crítico en la ejecución del SlaMonitorWorker.");
+                _logger.LogError(ex, "Error en la ejecución del SlaMonitorWorker.");
+                try
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
             }
-
-            await Task.Delay(TimeSpan.FromSeconds(checkIntervalSeconds), stoppingToken);
         }
 
         _logger.LogInformation("Background Service de Monitoreo de SLA detenido.");
