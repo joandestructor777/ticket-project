@@ -7,6 +7,9 @@ const CATEGORY_COLORS = {
   Otro: '#d97706'
 };
 
+const isExpired = (state) => state === 'Expired' || state === 6 || state === '6';
+const isResolved = (state) => ['Resolved', 'Closed', 4, 5, '4', '5'].includes(state);
+
 export default function DashboardCharts({ tickets }) {
   const byCategory = tickets.reduce((result, ticket) => {
     result[ticket.category] = (result[ticket.category] || 0) + 1;
@@ -15,17 +18,17 @@ export default function DashboardCharts({ tickets }) {
 
   const byTechnician = tickets.reduce((result, ticket) => {
     if (!ticket.assignedTechnicianId) return result;
-    const key = ticket.assignedTechnicianId.slice(0, 8);
+    const key = String(ticket.assignedTechnicianId).slice(0, 8);
     if (!result[key]) result[key] = { resolved: 0, expired: 0, total: 0 };
-    if (ticket.state === 'Expired') result[key].expired += 1;
-    if (['Resolved', 'Closed'].includes(ticket.state)) result[key].resolved += 1;
+    if (isExpired(ticket.state)) result[key].expired += 1;
+    if (isResolved(ticket.state)) result[key].resolved += 1;
     result[key].total += 1;
     return result;
   }, {});
 
   const categoryTotal = Math.max(tickets.length, 1);
-  const totalResolved = tickets.filter(t => ['Resolved', 'Closed'].includes(t.state)).length;
-  const totalExpired = tickets.filter(t => t.state === 'Expired').length;
+  const totalResolved = tickets.filter(t => isResolved(t.state)).length;
+  const totalExpired = tickets.filter(t => isExpired(t.state)).length;
   const totalEvaluated = totalResolved + totalExpired;
   const overallSlaPercent = totalEvaluated > 0 ? Math.round((totalResolved / totalEvaluated) * 100) : 100;
 
@@ -171,7 +174,7 @@ export default function DashboardCharts({ tickets }) {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {Object.entries(byCategory).map(([category, amount], index) => {
+              {Object.entries(byCategory).map(([category, amount]) => {
                 const percentage = Math.round((amount / categoryTotal) * 100);
                 const barColor = CATEGORY_COLORS[category] || '#6366f1';
 

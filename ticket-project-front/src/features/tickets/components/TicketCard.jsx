@@ -2,6 +2,22 @@ import React, { useState } from 'react';
 import { ticketService } from '../services/ticketService';
 
 const STATUS_BADGES = {
+  1: { label: 'Abierto', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', accent: '#3b82f6', icon: '🔵' },
+  2: { label: 'Asignado', bg: '#f5f3ff', color: '#6d28d9', border: '#ddd6fe', accent: '#8b5cf6', icon: '👤' },
+  3: { label: 'En Proceso', bg: '#fef9c3', color: '#a16207', border: '#fef08a', accent: '#eab308', icon: '⚡' },
+  4: { label: 'Resuelto', bg: '#ecfdf5', color: '#047857', border: '#a7f3d0', accent: '#10b981', icon: '✅' },
+  5: { label: 'Cerrado', bg: '#f1f5f9', color: '#475569', border: '#cbd5e1', accent: '#64748b', icon: '🔒' },
+  6: { label: 'SLA Vencido', bg: '#fef2f2', color: '#b91c1c', border: '#fca5a5', accent: '#ef4444', icon: '🚨' },
+  7: { label: 'Reabierto', bg: '#fff7ed', color: '#c2410c', border: '#ffedd5', accent: '#f97316', icon: '🔄' },
+
+  '1': { label: 'Abierto', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', accent: '#3b82f6', icon: '🔵' },
+  '2': { label: 'Asignado', bg: '#f5f3ff', color: '#6d28d9', border: '#ddd6fe', accent: '#8b5cf6', icon: '👤' },
+  '3': { label: 'En Proceso', bg: '#fef9c3', color: '#a16207', border: '#fef08a', accent: '#eab308', icon: '⚡' },
+  '4': { label: 'Resuelto', bg: '#ecfdf5', color: '#047857', border: '#a7f3d0', accent: '#10b981', icon: '✅' },
+  '5': { label: 'Cerrado', bg: '#f1f5f9', color: '#475569', border: '#cbd5e1', accent: '#64748b', icon: '🔒' },
+  '6': { label: 'SLA Vencido', bg: '#fef2f2', color: '#b91c1c', border: '#fca5a5', accent: '#ef4444', icon: '🚨' },
+  '7': { label: 'Reabierto', bg: '#fff7ed', color: '#c2410c', border: '#ffedd5', accent: '#f97316', icon: '🔄' },
+
   Opened: { label: 'Abierto', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', accent: '#3b82f6', icon: '🔵' },
   Assigned: { label: 'Asignado', bg: '#f5f3ff', color: '#6d28d9', border: '#ddd6fe', accent: '#8b5cf6', icon: '👤' },
   OnProcess: { label: 'En Proceso', bg: '#fef9c3', color: '#a16207', border: '#fef08a', accent: '#eab308', icon: '⚡' },
@@ -40,7 +56,10 @@ export default function TicketCard({ ticket }) {
   const priorityConfig = PRIORITY_COLORS[ticket.priority] || PRIORITY_COLORS.Media;
   const categoryIcon = CATEGORY_ICONS[ticket.category] || '📁';
 
-  const canReopen = ticket.state === 'Resolved' && ticket.resolutionDate &&
+  const isExpired = ticket.state === 'Expired' || ticket.state === 6 || ticket.state === '6';
+  const isResolved = ticket.state === 'Resolved' || ticket.state === 4 || ticket.state === '4';
+
+  const canReopen = isResolved && ticket.resolutionDate &&
     Date.now() <= new Date(ticket.resolutionDate).getTime() + 48 * 60 * 60 * 1000;
 
   const reopen = async () => {
@@ -66,7 +85,7 @@ export default function TicketCard({ ticket }) {
       onMouseLeave={() => setIsHovered(false)}
       style={{
         background: '#ffffff',
-        border: ticket.state === 'Expired' ? '1.5px solid #fca5a5' : '1px solid var(--border-color)',
+        border: isExpired ? '1.5px solid #fca5a5' : '1px solid var(--border-color)',
         borderRadius: '14px',
         overflow: 'hidden',
         display: 'flex',
@@ -163,7 +182,7 @@ export default function TicketCard({ ticket }) {
               fontSize: '0.75rem',
               fontWeight: '500'
             }}>
-              👤 Técnico: {ticket.assignedTechnicianId.slice(0, 8)}
+              👤 Técnico: {String(ticket.assignedTechnicianId).slice(0, 8)}
             </span>
           )}
         </div>
@@ -198,7 +217,7 @@ export default function TicketCard({ ticket }) {
           </div>
         )}
 
-        {ticket.state === 'Expired' && (
+        {isExpired && (
           <div style={{
             background: '#fef2f2',
             border: '1px solid #fca5a5',
@@ -229,10 +248,10 @@ export default function TicketCard({ ticket }) {
         }}>
           <span>📅 Creado: {formatDate(ticket.creationDate || ticket.fechaCreacion)}</span>
           <span style={{
-            color: ticket.state === 'Expired' ? '#dc2626' : 'var(--text-main)',
+            color: isExpired ? '#dc2626' : 'var(--text-main)',
             fontWeight: '600'
           }}>
-            ⏳ SLA: {formatDate(ticket.limitDateSLA)}
+            ⏳ SLA: {formatDate(ticket.limitDateSLA || ticket.limitDateSla)}
           </span>
         </div>
 
