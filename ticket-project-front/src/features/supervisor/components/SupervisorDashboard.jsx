@@ -80,7 +80,6 @@ const SupervisorDashboard = () => {
               boxShadow: activeTab === 'list' ? '0 1px 2px 0 rgba(0,0,0,0.05)' : 'none'
             }}
           >
-            📋 Listado de Tickets
           </button>
           <button 
             onClick={() => setActiveTab('reports')}
@@ -96,7 +95,6 @@ const SupervisorDashboard = () => {
               boxShadow: activeTab === 'reports' ? '0 1px 2px 0 rgba(0,0,0,0.05)' : 'none'
             }}
           >
-            📊 Reportes de Cumplimiento (SLA)
           </button>
         </div>
 
