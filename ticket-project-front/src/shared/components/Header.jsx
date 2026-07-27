@@ -6,7 +6,7 @@ const Header = () => {
       style={{
         backgroundColor: 'var(--bg-card)',
         borderBottom: '1px solid var(--border-color)',
-        marginBottom: '32px'
+        marginBottom: '28px'
       }}
     >
       <div
@@ -22,8 +22,8 @@ const Header = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div
             style={{
-              width: '36px',
-              height: '36px',
+              width: '38px',
+              height: '38px',
               borderRadius: '8px',
               backgroundColor: 'var(--primary)',
               display: 'flex',
@@ -37,7 +37,14 @@ const Header = () => {
             HD
           </div>
           <div>
-            <h1 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '600', color: 'var(--text-main)' }}>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: '1.2rem',
+                fontWeight: '700',
+                color: 'var(--text-main)'
+              }}
+            >
               HelpDesk System
             </h1>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -55,7 +62,7 @@ const Header = () => {
               fontSize: '0.85rem',
               color: 'var(--text-muted)',
               backgroundColor: 'var(--bg-light)',
-              padding: '6px 12px',
+              padding: '6px 14px',
               borderRadius: '20px',
               border: '1px solid var(--border-color)'
             }}
