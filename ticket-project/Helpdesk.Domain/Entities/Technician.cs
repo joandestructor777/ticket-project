@@ -9,3 +9,4 @@ public sealed class Technician
     public ICollection<TechnicianSpecialty> Specialties { get; set; }
         = new List<TechnicianSpecialty>();
 }
+

@@ -36,6 +36,8 @@ public sealed class TicketService : ITicketService
 
         ticket.State = TicketState.Reopened;
         ticket.ReopenJustification = justification.Trim();
+        ticket.ResolutionDate = null;
+
         await _ticketRepository.UpdateAsync(ticket);
         return ticket;
     }
