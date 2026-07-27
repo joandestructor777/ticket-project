@@ -10,14 +10,6 @@ const STATUS_BADGES = {
   6: { label: 'SLA Vencido', bg: '#fef2f2', color: '#b91c1c', border: '#fca5a5', accent: '#ef4444' },
   7: { label: 'Reabierto', bg: '#fff7ed', color: '#c2410c', border: '#ffedd5', accent: '#f97316' },
 
-  '1': { label: 'Abierto', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', accent: '#3b82f6' },
-  '2': { label: 'Asignado', bg: '#f5f3ff', color: '#6d28d9', border: '#ddd6fe', accent: '#8b5cf6' },
-  '3': { label: 'En Proceso', bg: '#fef9c3', color: '#a16207', border: '#fef08a', accent: '#eab308' },
-  '4': { label: 'Resuelto', bg: '#ecfdf5', color: '#047857', border: '#a7f3d0', accent: '#10b981' },
-  '5': { label: 'Cerrado', bg: '#f1f5f9', color: '#475569', border: '#cbd5e1', accent: '#64748b' },
-  '6': { label: 'SLA Vencido', bg: '#fef2f2', color: '#b91c1c', border: '#fca5a5', accent: '#ef4444' },
-  '7': { label: 'Reabierto', bg: '#fff7ed', color: '#c2410c', border: '#ffedd5', accent: '#f97316' },
-
   Opened: { label: 'Abierto', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', accent: '#3b82f6' },
   Assigned: { label: 'Asignado', bg: '#f5f3ff', color: '#6d28d9', border: '#ddd6fe', accent: '#8b5cf6' },
   OnProcess: { label: 'En Proceso', bg: '#fef9c3', color: '#a16207', border: '#fef08a', accent: '#eab308' },
