@@ -6,13 +6,14 @@ using Helpdesk.Domain.Interfaces;
 using Helpdesk.Infrastructure.Data;
 using Helpdesk.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+    {
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -27,12 +28,10 @@ builder.Services.AddDbContext<HelpdeskDbContext>(options =>
 
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 builder.Services.AddScoped<ITechnicianRepository, TechnicianRepository>();
-builder.Services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
 builder.Services.AddScoped<IClientTicketService, ClientTicketService>();
 builder.Services.AddScoped<IAssignmentService, AssignmentService>();
 builder.Services.AddScoped<ITechnicianManagementService, TechnicianManagementService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
-builder.Services.AddScoped<ITechnicianTicketService, TechnicianTicketService>();
 builder.Services.AddScoped<ISlaMonitorService, SlaMonitorService>();
 
 var slaOptions = builder.Configuration.GetSection(SlaOptions.SectionName).Get<SlaOptions>() ?? new SlaOptions();

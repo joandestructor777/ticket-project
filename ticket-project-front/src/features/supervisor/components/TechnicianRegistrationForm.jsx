@@ -16,15 +16,12 @@ export default function TechnicianRegistrationForm() {
   const [success, setSuccess] = useState('');
 
   const handleSpecialtyChange = (category) => {
-    setForm(currentForm => {
+    setForm((currentForm) => {
       const hasCategory = currentForm.specialties.includes(category);
-
       return {
         ...currentForm,
         specialties: hasCategory
-          ? currentForm.specialties.filter(
-              specialty => specialty !== category
-            )
+          ? currentForm.specialties.filter((specialty) => specialty !== category)
           : [...currentForm.specialties, category]
       };
     });
@@ -54,27 +51,28 @@ export default function TechnicianRegistrationForm() {
   };
 
   return (
-    <section className="technician-registration">
+    <section className="ticket-form" style={{ maxWidth: '600px' }}>
       <h2>Registrar técnico</h2>
 
-      <form onSubmit={handleSubmit}>
-        <label className="assignment-label">
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <label>
           Nombre completo
           <input
             type="text"
             value={form.fullName}
             maxLength="150"
+            placeholder="Ej. Juan Pérez"
             required
-            onChange={event =>
-              setForm(currentForm => ({
-                ...currentForm,
-                fullName: event.target.value
+            onChange={(e) =>
+              setForm((current) => ({
+                ...current,
+                fullName: e.target.value
               }))
             }
           />
         </label>
 
-        <label className="assignment-label">
+        <label>
           Máximo de tickets abiertos
           <input
             type="number"
@@ -82,28 +80,32 @@ export default function TechnicianRegistrationForm() {
             max="50"
             value={form.maxOpenTickets}
             required
-            onChange={event =>
-              setForm(currentForm => ({
-                ...currentForm,
-                maxOpenTickets: event.target.value
+            onChange={(e) =>
+              setForm((current) => ({
+                ...current,
+                maxOpenTickets: e.target.value
               }))
             }
           />
         </label>
 
-        <fieldset className="specialties-fieldset">
-          <legend>Especialidades</legend>
+        <fieldset style={{ border: '1px solid var(--border-color)', borderRadius: '6px', padding: '12px 16px' }}>
+          <legend style={{ fontSize: '0.85rem', fontWeight: '600', padding: '0 6px', color: 'var(--text-main)' }}>
+            Especialidades
+          </legend>
 
-          {categories.map(category => (
-            <label key={category} className="specialty-option">
-              <input
-                type="checkbox"
-                checked={form.specialties.includes(category)}
-                onChange={() => handleSpecialtyChange(category)}
-              />
-              {category}
-            </label>
-          ))}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '8px' }}>
+            {categories.map((category) => (
+              <label key={category} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={form.specialties.includes(category)}
+                  onChange={() => handleSpecialtyChange(category)}
+                />
+                {category}
+              </label>
+            ))}
+          </div>
         </fieldset>
 
         <button
@@ -115,8 +117,8 @@ export default function TechnicianRegistrationForm() {
         </button>
       </form>
 
-      {success && <p className="notice success">{success}</p>}
-      {error && <p className="notice error">{error}</p>}
+      {success && <p className="notice success" style={{ margin: 0 }}>{success}</p>}
+      {error && <p className="notice error" style={{ margin: 0 }}>{error}</p>}
     </section>
   );
 }

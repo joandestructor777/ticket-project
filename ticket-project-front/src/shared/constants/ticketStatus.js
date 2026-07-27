@@ -1,46 +1,19 @@
 export const TICKET_STATUS = {
-  Opened: {
-    label: 'Abierto',
-    bgVar: '--status-opened-bg',
-    textVar: '--status-opened-text',
-    icon: '📂'
-  },
-  Assigned: {
-    label: 'Asignado',
-    bgVar: '--status-assigned-bg',
-    textVar: '--status-assigned-text',
-    icon: '👤'
-  },
-  OnProcess: {
-    label: 'En Proceso',
-    bgVar: '--status-onprocess-bg',
-    textVar: '--status-onprocess-text',
-    icon: '⚡'
-  },
-  Resolved: {
-    label: 'Resuelto',
-    bgVar: '--status-resolved-bg',
-    textVar: '--status-resolved-text',
-    icon: '✅'
-  },
-  Closed: {
-    label: 'Cerrado',
-    bgVar: '--status-closed-bg',
-    textVar: '--status-closed-text',
-    icon: '🔒'
-  },
-  Expired: {
-    label: 'Vencido',
-    bgVar: '--status-expired-bg',
-    textVar: '--status-expired-text',
-    icon: '🚨'
-  },
-  Reopened: {
-    label: 'Reabierto',
-    bgVar: '--status-reopened-bg',
-    textVar: '--status-reopened-text',
-    icon: '🔄'
-  }
+  1: { label: 'Abierto', bgVar: '--status-opened-bg', textVar: '--status-opened-text' },
+  2: { label: 'Asignado', bgVar: '--status-assigned-bg', textVar: '--status-assigned-text' },
+  3: { label: 'En Proceso', bgVar: '--status-onprocess-bg', textVar: '--status-onprocess-text' },
+  4: { label: 'Resuelto', bgVar: '--status-resolved-bg', textVar: '--status-resolved-text' },
+  5: { label: 'Cerrado', bgVar: '--status-closed-bg', textVar: '--status-closed-text' },
+  6: { label: 'Vencido', bgVar: '--status-expired-bg', textVar: '--status-expired-text' },
+  7: { label: 'Reabierto', bgVar: '--status-reopened-bg', textVar: '--status-reopened-text' },
+
+  Opened: { label: 'Abierto', bgVar: '--status-opened-bg', textVar: '--status-opened-text' },
+  Assigned: { label: 'Asignado', bgVar: '--status-assigned-bg', textVar: '--status-assigned-text' },
+  OnProcess: { label: 'En Proceso', bgVar: '--status-onprocess-bg', textVar: '--status-onprocess-text' },
+  Resolved: { label: 'Resuelto', bgVar: '--status-resolved-bg', textVar: '--status-resolved-text' },
+  Closed: { label: 'Cerrado', bgVar: '--status-closed-bg', textVar: '--status-closed-text' },
+  Expired: { label: 'Vencido', bgVar: '--status-expired-bg', textVar: '--status-expired-text' },
+  Reopened: { label: 'Reabierto', bgVar: '--status-reopened-bg', textVar: '--status-reopened-text' }
 };
 
 export const TICKET_PRIORITIES = {

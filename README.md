@@ -1,20 +1,20 @@
-# 🎫 Sistema de Mesa de Ayuda (HelpDesk System)
+# Sistema de Mesa de Ayuda (HelpDesk System)
 
-Un sistema completo de gestión de solicitudes y tickets de soporte técnico desarrollado con **.NET 8 (Web API)** en el Backend y **React.js** en el Frontend, siguiendo principios de **Clean Architecture**.
-
----
-
-## 🚀 Historias de Usuario Implementadas
-
-El sistema resuelve tres funcionalidades críticas de automatización y monitoreo:
-
-* ⏱️ **HU-004: Vencimiento Automático de SLA:** Un servicio en segundo plano (*Background Worker*) monitorea continuamente las fechas límite de los tickets activos. Si el tiempo de atención asignado expira, el sistema automáticamente marca el ticket como `Vencido` y registra una alerta con marca de tiempo UTC.
-* 🔄 **HU-005: Reapertura de Tickets con Periodo de Gracia:** Permite a los usuarios reabrir tickets resueltos que hayan vuelto a fallar dentro de un plazo configurable (por defecto 48 horas). Si el periodo de gracia expira, el ticket se cierra definitivamente y exige la creación de un nuevo caso.
-* 📊 **HU-006: Métricas y Panel de Monitoreo:** Un Dashboard interactivo para supervisores con indicadores clave (tickets resueltos, pendientes, vencidos) y gráficos visuales de cumplimiento de SLA y distribución por categorías.
+Un sistema completo de gestión de solicitudes y tickets de soporte técnico desarrollado con .NET 8 (Web API) en el Backend y React.js en el Frontend, siguiendo principios de Clean Architecture.
 
 ---
 
-## 🏗️ Arquitectura del Proyecto
+## Historias de Usuario Implementadas
+
+El sistema resuelve tres funcionalidades principales de automatización y monitoreo:
+
+- **HU-004: Vencimiento Automático de SLA:** Un servicio en segundo plano (Background Worker) monitorea continuamente las fechas límite de los tickets activos. Si el tiempo de atención asignado expira, el sistema marca automáticamente el ticket como Vencido y registra una alerta con marca de tiempo UTC.
+- **HU-005: Reapertura de Tickets con Periodo de Gracia:** Permite a los usuarios reabrir tickets resueltos que hayan vuelto a fallar dentro de un plazo configurable (por defecto 48 horas). Si el periodo de gracia expira, el ticket se cierra definitivamente y exige la creación de un nuevo caso.
+- **HU-006: Métricas y Panel de Monitoreo:** Un dashboard interactivo para supervisores con indicadores clave (tickets resueltos, pendientes, vencidos) y gráficos visuales de cumplimiento de SLA y distribución por categorías.
+
+---
+
+## Arquitectura del Proyecto
 
 ```text
 HelpDeskSystem/
@@ -32,19 +32,19 @@ HelpDeskSystem/
 
 ---
 
-## ⚡ Tecnologías Utilizadas
+## Tecnologías Utilizadas
 
-* **Backend:** C# .NET 8, Entity Framework Core, LINQ, Background Services (Hosted Services).
-* **Frontend:** React.js, CSS3 Vanilla / Modern UI, Hooks personalizados.
-* **Patrones & Principios:** Clean Architecture, Repository Pattern, Dependency Injection, RESTful APIs.
+- **Backend:** C# .NET 8, Entity Framework Core, LINQ, Background Services (Hosted Services).
+- **Frontend:** React.js, CSS3 Vanilla, Hooks personalizados.
+- **Patrones y Principios:** Clean Architecture, Repository Pattern, Dependency Injection, RESTful APIs.
 
 ---
 
-## 🛠️ Cómo Ejecutar el Proyecto
+## Cómo Ejecutar el Proyecto
 
 ### 1. Requisitos Previos
-* [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-* [Node.js](https://nodejs.org/) (v16+)
+- .NET 8.0 SDK
+- Node.js (v16+)
 
 ### 2. Ejecutar el Backend (.NET API)
 ```bash

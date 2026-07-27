@@ -65,22 +65,25 @@ export default function SupervisorAssignmentDashboard() {
             </p>
           ) : (
             <div className="assignment-ticket-list">
-              {tickets.map(ticket => {
+              {tickets.map((ticket) => {
                 const priority = TICKET_PRIORITIES[ticket.priority];
+                const isSelected = selectedTicket?.id === ticket.id;
 
                 return (
-                  <button
+                  <div
                     key={ticket.id}
-                    className={`assignment-ticket ${
-                      selectedTicket?.id === ticket.id
-                        ? 'assignment-ticket-selected'
-                        : ''
+                    className={`assignment-ticket-card ${
+                      isSelected ? 'selected' : ''
                     }`}
                     onClick={() => selectTicket(ticket)}
                   >
                     <div className="ticket-heading">
-                      <h3>{ticket.title}</h3>
-                      <small>{formatDate(ticket.creationDate)}</small>
+                      <h3 style={{ fontSize: '0.95rem', margin: 0 }}>
+                        {ticket.title}
+                      </h3>
+                      <small style={{ color: 'var(--text-muted)' }}>
+                        {formatDate(ticket.creationDate)}
+                      </small>
                     </div>
 
                     <div className="ticket-badges">
@@ -89,7 +92,6 @@ export default function SupervisorAssignmentDashboard() {
                         bgVar="--primary-light"
                         textVar="--primary"
                       />
-
                       <Badge
                         text={`Prioridad: ${
                           priority?.label || ticket.priority
@@ -99,10 +101,10 @@ export default function SupervisorAssignmentDashboard() {
                       />
                     </div>
 
-                    <small>
+                    <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
                       Vence: <strong>{formatDate(ticket.limitDateSla)}</strong>
                     </small>
-                  </button>
+                  </div>
                 );
               })}
             </div>
@@ -117,58 +119,60 @@ export default function SupervisorAssignmentDashboard() {
               Selecciona un ticket para consultar técnicos disponibles.
             </p>
           ) : (
-            <>
-              <p className="selected-ticket-description">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div
+                style={{
+                  background: 'var(--bg-light)',
+                  border: '1px solid var(--border-color)',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  fontSize: '0.85rem'
+                }}
+              >
                 Ticket seleccionado: <strong>{selectedTicket.title}</strong>
                 <br />
                 Categoría requerida: <strong>{selectedTicket.category}</strong>
-              </p>
+              </div>
 
               {loadingTechnicians ? (
                 <p className="muted">Buscando técnicos con cupo...</p>
-                ) : technicians.length === 0 ? (
+              ) : technicians.length === 0 ? (
                 isForceAssignmentMode ? (
-                    <p className="notice error">
+                  <p className="notice error">
                     No hay técnicos especializados para esta categoría.
-                    </p>
+                  </p>
                 ) : (
-                    <>
-                    <p className="notice error">
-                        No hay técnicos especializados disponibles con cupo libre.
+                  <div>
+                    <p className="notice error" style={{ marginBottom: '12px' }}>
+                      No hay técnicos especializados disponibles con cupo libre.
                     </p>
-
                     <button
-                        className="secondary-button"
-                        onClick={showTechniciansAtCapacity}
+                      className="secondary-button"
+                      onClick={showTechniciansAtCapacity}
                     >
-                        Ver técnicos para asignación forzada
+                      Ver técnicos para asignación forzada
                     </button>
-                    </>
+                  </div>
                 )
-                ) : (
-                <>
-                {isForceAssignmentMode && (
-                <p className="notice error">
-                    Asignación forzada: el técnico seleccionado no tiene cupo disponible.
-                </p>
-                )}
-                  <label className="assignment-label">
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  {isForceAssignmentMode && (
+                    <p className="notice error">
+                      Asignación forzada: el técnico seleccionado no tiene cupo disponible.
+                    </p>
+                  )}
+
+                  <label className="ticket-form" style={{ padding: 0, border: 'none', boxShadow: 'none' }}>
                     Selecciona un técnico
                     <select
                       value={selectedTechnicianId}
-                      onChange={event =>
-                        setSelectedTechnicianId(event.target.value)
-                      }
+                      onChange={(e) => setSelectedTechnicianId(e.target.value)}
                     >
                       <option value="">Selecciona una opción</option>
-
-                      {technicians.map(technician => (
-                        <option
-                          key={technician.id}
-                          value={technician.id}
-                        >
-                            {technician.fullName} —{' '}
-                            {technician.availableCapacity > 0
+                      {technicians.map((technician) => (
+                        <option key={technician.id} value={technician.id}>
+                          {technician.fullName} —{' '}
+                          {technician.availableCapacity > 0
                             ? `disponibles: ${technician.availableCapacity}`
                             : `sin cupo (${technician.activeTickets}/${technician.maxOpenTickets})`}
                         </option>
@@ -182,20 +186,21 @@ export default function SupervisorAssignmentDashboard() {
                     disabled={assigning || !selectedTechnicianId}
                   >
                     {assigning
-                        ? 'Asignando ticket...'
-                        : isForceAssignmentMode
-                            ? 'Forzar asignación'
-                            : 'Confirmar asignación'}
+                      ? 'Asignando ticket...'
+                      : isForceAssignmentMode
+                      ? 'Forzar asignación'
+                      : 'Confirmar asignación'}
                   </button>
-                </>
+                </div>
               )}
-            </>
+            </div>
           )}
         </section>
       </section>
-      <section className="technician-registration-section">
-    <TechnicianRegistrationForm />
-    </section>
+
+      <section style={{ marginTop: '32px' }}>
+        <TechnicianRegistrationForm />
+      </section>
     </main>
   );
 }

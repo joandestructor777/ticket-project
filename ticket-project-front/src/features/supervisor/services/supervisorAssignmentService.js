@@ -25,14 +25,11 @@ export const supervisorAssignmentService = {
   getOpenTickets: () =>
     request('/api/supervisor/tickets/open'),
 
-    getAvailableTechnicians: (
-    category,
-    includeAtCapacityTechnicians = false
-    ) =>
+  getAvailableTechnicians: (category, includeAtCapacityTechnicians = false) =>
     request(
-        `/api/supervisor/technicians/available?category=${encodeURIComponent(
+      `/api/supervisor/technicians/available?category=${encodeURIComponent(
         category
-        )}&includeAtCapacityTechnicians=${includeAtCapacityTechnicians}`
+      )}&includeAtCapacityTechnicians=${includeAtCapacityTechnicians}`
     ),
 
   assignTicket: (ticketId, technicianId, forceAssignment = false) =>
