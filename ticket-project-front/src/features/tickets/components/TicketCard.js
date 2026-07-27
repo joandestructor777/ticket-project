@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Card from '../../../shared/components/Card';
 import Badge from '../../../shared/components/Badge';
 import { TICKET_STATUS, TICKET_PRIORITIES } from '../../../shared/constants/ticketStatus';
+import { ticketService } from '../services/ticketService';
 
 const TicketCard = ({ ticket }) => {
   const isExpired = ticket.estado === 'Expired';
@@ -18,6 +19,35 @@ const TicketCard = ({ ticket }) => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const [isReopening, setIsReopening] = useState(false);
+  const [justification, setJustification] = useState('');
+  const [reopenError, setReopenError] = useState('');
+
+  const isWithinGracePeriod = () => {
+    if (ticket.estado !== 'Resolved' || !ticket.fechaResolucion) return false;
+    const resolvedDate = new Date(ticket.fechaResolucion);
+    const now = new Date();
+    const diffHours = (now - resolvedDate) / (1000 * 60 * 60);
+    return diffHours <= 48;
+  };
+
+  const handleReopen = async () => {
+    if (!justification.trim()) {
+      setReopenError('Debe ingresar una justificación.');
+      return;
+    }
+    
+    try {
+      setReopenError('');
+      await ticketService.reopenTicket(ticket.id, justification);
+      alert('Ticket reabierto exitosamente. Por favor, actualice la vista.');
+      setIsReopening(false);
+      setJustification('');
+    } catch (err) {
+      setReopenError(err.message || 'Error al reabrir el ticket');
+    }
   };
 
   return (
@@ -131,6 +161,50 @@ const TicketCard = ({ ticket }) => {
           }}
         >
           {ticket.logAlerta}
+        </div>
+      )}
+
+      {/* Botón Reabrir Ticket */}
+      {isWithinGracePeriod() && !isReopening && (
+        <div style={{ marginTop: '16px', textAlign: 'right' }}>
+          <button 
+            onClick={() => setIsReopening(true)}
+            style={{
+              background: '#ffffff',
+              border: '1px solid var(--primary)',
+              color: 'var(--primary)',
+              padding: '6px 12px',
+              borderRadius: '4px',
+              fontSize: '0.8rem',
+              fontWeight: '600',
+              cursor: 'pointer'
+            }}
+          >
+            Reabrir Ticket
+          </button>
+        </div>
+      )}
+
+      {isReopening && (
+        <div style={{ marginTop: '16px', padding: '12px', border: '1px solid var(--border-color)', borderRadius: '6px', background: '#f8fafc' }}>
+          <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '8px', color: 'var(--text-main)' }}>
+            Justificación de Reapertura:
+          </label>
+          <textarea 
+            value={justification}
+            onChange={(e) => setJustification(e.target.value)}
+            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid var(--border-color)', minHeight: '60px', fontSize: '0.8rem', marginBottom: '8px' }}
+            placeholder="Ingrese el motivo por el cual la solución no fue satisfactoria..."
+          />
+          {reopenError && <p style={{ color: 'red', fontSize: '0.75rem', marginBottom: '8px' }}>{reopenError}</p>}
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+            <button onClick={() => setIsReopening(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.8rem', cursor: 'pointer' }}>
+              Cancelar
+            </button>
+            <button onClick={handleReopen} style={{ background: 'var(--primary)', border: 'none', color: '#fff', padding: '6px 12px', borderRadius: '4px', fontSize: '0.8rem', cursor: 'pointer' }}>
+              Confirmar Reapertura
+            </button>
+          </div>
         </div>
       )}
     </Card>

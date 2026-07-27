@@ -1,6 +1,8 @@
 import React from 'react';
 import { useSupervisorTickets } from '../hooks/useSupervisorTickets';
 import TicketCard from '../../tickets/components/TicketCard';
+import DashboardCharts from './DashboardCharts';
+import { useState } from 'react';
 
 const SupervisorDashboard = () => {
   const {
@@ -15,17 +17,11 @@ const SupervisorDashboard = () => {
     refresh
   } = useSupervisorTickets();
 
-  const containerStyle = {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '30px 20px',
-  };
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [activeTab, setActiveTab] = useState('list'); // 'list' or 'reports'
 
-  const headerStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '24px'
+  const containerStyle = {
+    width: '100%',
   };
 
   const metricsGridStyle = {
@@ -79,16 +75,8 @@ const SupervisorDashboard = () => {
 
   return (
     <div style={containerStyle}>
-      {/* Sección de Encabezado */}
-      <div style={headerStyle}>
-        <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-main)' }}>
-            Panel de Control de SLAs
-          </h1>
-          <p style={{ color: 'var(--text-muted)', marginTop: '2px', fontSize: '0.85rem' }}>
-            Monitoreo y gestión de tiempos límite (SLA) de tickets de soporte.
-          </p>
-        </div>
+      {/* Botón de recarga */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
         <button 
           onClick={refresh}
           disabled={loading}
@@ -114,6 +102,22 @@ const SupervisorDashboard = () => {
           }}
         >
           {loading ? 'Actualizando...' : '🔄 Actualizar Datos'}
+        </button>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+        <button 
+          onClick={() => setActiveTab('list')}
+          style={{ background: 'none', border: 'none', fontSize: '1rem', fontWeight: activeTab === 'list' ? '700' : '500', color: activeTab === 'list' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', padding: '8px 16px', borderBottom: activeTab === 'list' ? '2px solid var(--primary)' : '2px solid transparent' }}
+        >
+          Listado de Tickets
+        </button>
+        <button 
+          onClick={() => setActiveTab('reports')}
+          style={{ background: 'none', border: 'none', fontSize: '1rem', fontWeight: activeTab === 'reports' ? '700' : '500', color: activeTab === 'reports' ? 'var(--primary)' : 'var(--text-muted)', cursor: 'pointer', padding: '8px 16px', borderBottom: activeTab === 'reports' ? '2px solid var(--primary)' : '2px solid transparent' }}
+        >
+          Reportes de Cumplimiento (SLA)
         </button>
       </div>
 
@@ -149,7 +153,45 @@ const SupervisorDashboard = () => {
         </div>
       </div>
 
-      {/* Barra de Filtros */}
+      {activeTab === 'reports' && (
+        <div style={{ marginBottom: '24px' }}>
+          <div style={filterBarStyle}>
+            <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-main)' }}>Rango de Fechas:</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <input 
+                type="date" 
+                value={dateRange.start} 
+                onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                style={selectStyle}
+              />
+              <span style={{ color: 'var(--text-muted)' }}>hasta</span>
+              <input 
+                type="date" 
+                value={dateRange.end} 
+                onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                style={selectStyle}
+              />
+            </div>
+            <button
+               onClick={() => { setDateRange({start:'', end:''}) }}
+               style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '6px 12px', fontSize: '0.8rem', cursor: 'pointer', color: 'var(--text-muted)' }}
+            >Limpiar Filtros</button>
+          </div>
+          <DashboardCharts 
+            tickets={tickets.filter(t => {
+              if (!dateRange.start && !dateRange.end) return true;
+              const tDate = new Date(t.fechaCreacion);
+              if (dateRange.start && tDate < new Date(dateRange.start)) return false;
+              if (dateRange.end && tDate > new Date(dateRange.end)) return false;
+              return true;
+            })} 
+          />
+        </div>
+      )}
+
+      {activeTab === 'list' && (
+        <>
+          {/* Barra de Filtros */}
       <div style={filterBarStyle}>
         <span style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-main)' }}>Filtros:</span>
         
@@ -204,6 +246,8 @@ const SupervisorDashboard = () => {
             <TicketCard key={ticket.id} ticket={ticket} />
           ))}
         </div>
+      )}
+        </>
       )}
     </div>
   );

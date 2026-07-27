@@ -1,6 +1,7 @@
-﻿namespace Helpdesk.Application.Interfaces;
+namespace Helpdesk.Application.Interfaces;
 
 public interface ISlaMonitorService
 {
     Task ProcessExpireTicketsAsync();
+    Task ProcessGracePeriodTicketsAsync();
 }

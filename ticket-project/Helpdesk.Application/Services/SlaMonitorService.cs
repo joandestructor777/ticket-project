@@ -1,4 +1,5 @@
-﻿using Helpdesk.Application.Interfaces;
+using Helpdesk.Application.Interfaces;
+using Helpdesk.Domain.Enums;
 using Helpdesk.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -36,6 +37,34 @@ public class SlaMonitorService : ISlaMonitorService
         if (processedCount > 0)
         {
             _logger.LogInformation("Se han procesado e informado {Cantidad} tickets vencidos.", processedCount);
+        }
+    }
+
+    public async Task ProcessGracePeriodTicketsAsync()
+    {
+        var now = DateTime.UtcNow;
+        var gracePeriodStr = await _ticketRepository.GetSystemSettingAsync("GracePeriodHours") ?? "48";
+        if (!int.TryParse(gracePeriodStr, out int gracePeriodHours))
+            gracePeriodHours = 48;
+
+        var limitTime = now.AddHours(-gracePeriodHours);
+        
+        _logger.LogInformation("Consultando tickets resueltos que superaron el plazo de gracia de {Horas}h (Límite: {Limite} UTC)", gracePeriodHours, limitTime);
+
+        var pastGracePeriodTickets = await _ticketRepository.GetResolvedTicketsPastGracePeriodAsync(limitTime);
+
+        int processedCount = 0;
+        foreach (var ticket in pastGracePeriodTickets)
+        {
+            _logger.LogInformation("Ticket ID {Id} superó el plazo de gracia. Cerrando definitivamente...", ticket.Id);
+            ticket.State = TicketState.Closed;
+            await _ticketRepository.UpdateAsync(ticket);
+            processedCount++;
+        }
+
+        if (processedCount > 0)
+        {
+            _logger.LogInformation("Se cerraron definitivamente {Cantidad} tickets tras expirar su plazo de gracia.", processedCount);
         }
     }
 }
