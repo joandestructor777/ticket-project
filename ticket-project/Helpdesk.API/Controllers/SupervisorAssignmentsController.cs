@@ -27,12 +27,12 @@ public sealed class SupervisorAssignmentsController : ControllerBase
         return Ok(tickets);
     }
 
-[HttpGet("technicians/available")]
-public async Task<ActionResult<IReadOnlyList<TechnicianAvailabilityResult>>>
-    GetAvailableTechnicians(
-        [FromQuery] string category,
-        [FromQuery] bool includeAtCapacityTechnicians,
-        CancellationToken cancellationToken)
+    [HttpGet("technicians/available")]
+    public async Task<ActionResult<IReadOnlyList<TechnicianAvailabilityResult>>>
+        GetAvailableTechnicians(
+            [FromQuery] string category,
+            [FromQuery] bool includeAtCapacityTechnicians,
+            CancellationToken cancellationToken)
     {
         try
         {

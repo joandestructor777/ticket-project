@@ -1,37 +1,111 @@
 import React, { useState } from 'react';
 import { ticketService } from '../services/ticketService';
+import Badge from '../../../shared/components/Badge';
+import { TICKET_PRIORITIES, TICKET_STATUS } from '../../../shared/constants/ticketStatus';
 
-const formatDate = value => value
-  ? new Date(value).toLocaleString('es-CO', { dateStyle: 'medium', timeStyle: 'short' })
-  : 'Sin fecha';
+const formatDate = (value) =>
+  new Date(value).toLocaleString('es-CO', {
+    dateStyle: 'medium',
+    timeStyle: 'short'
+  });
 
-export default function TicketCard({ ticket }) {
+export default function TicketCard({ ticket, onReopened, allowReopen = false }) {
   const [isReopening, setIsReopening] = useState(false);
   const [justification, setJustification] = useState('');
   const [error, setError] = useState('');
-  const canReopen = ticket.state === 'Resolved' && ticket.resolutionDate &&
-    Date.now() <= new Date(ticket.resolutionDate).getTime() + 48 * 60 * 60 * 1000;
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const reopen = async () => {
+  const status = TICKET_STATUS[ticket.state];
+  const priority = TICKET_PRIORITIES[ticket.priority];
+  const canReopen = allowReopen && ticket.state === 'Resolved';
+
+  const handleReopen = async (event) => {
+    event.preventDefault();
+
     try {
+      setIsSubmitting(true);
       setError('');
+
       await ticketService.reopenTicket(ticket.id, justification);
-      window.location.reload();
+      setIsReopening(false);
+      setJustification('');
+      await onReopened();
     } catch (exception) {
       setError(exception.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <article className="ticket-card">
-      <h3>{ticket.title}</h3>
+    <article className="client-ticket">
+      <div className="ticket-heading">
+        <h3>{ticket.title}</h3>
+        <time>{formatDate(ticket.creationDate)}</time>
+      </div>
+
       <p>{ticket.description}</p>
-      <p><strong>Estado:</strong> {ticket.state}</p>
-      <p><strong>Prioridad:</strong> {ticket.priority} · <strong>Categoría:</strong> {ticket.category}</p>
-      <small>Creado: {formatDate(ticket.creationDate)} · Límite SLA: {formatDate(ticket.limitDateSLA)}</small>
-      {ticket.state === 'Expired' && <p className="notice error">SLA vencido.</p>}
-      {canReopen && !isReopening && <button className="secondary-button" onClick={() => setIsReopening(true)}>Reabrir ticket</button>}
-      {isReopening && <div><textarea value={justification} onChange={event => setJustification(event.target.value)} placeholder="Justificación de reapertura" /><button className="primary-button" onClick={reopen}>Confirmar reapertura</button>{error && <p className="notice error">{error}</p>}</div>}
+
+      <div className="ticket-badges">
+        <Badge
+          text={status?.label || ticket.state}
+          bgVar={status?.bgVar}
+          textVar={status?.textVar}
+          icon={status?.icon}
+        />
+        <Badge
+          text={`Prioridad: ${priority?.label || ticket.priority}`}
+          bgVar={priority?.bgVar}
+          textVar={priority?.textVar}
+        />
+        <Badge text={ticket.category} bgVar="--primary-light" textVar="--primary" />
+      </div>
+
+      <small>
+        Vence: <strong>{formatDate(ticket.limitDateSla)}</strong>
+      </small>
+
+      {canReopen && !isReopening && (
+        <button
+          className="secondary-button reopen-ticket-button"
+          onClick={() => setIsReopening(true)}
+          type="button"
+        >
+          Reabrir ticket
+        </button>
+      )}
+
+      {isReopening && (
+        <form className="reopen-ticket-form" onSubmit={handleReopen}>
+          <label>
+            Justificación de reapertura
+            <textarea
+              value={justification}
+              onChange={(event) => setJustification(event.target.value)}
+              placeholder="Explica por qué la solución no resolvió el incidente."
+              maxLength="2000"
+              required
+              rows="3"
+            />
+          </label>
+
+          <div className="reopen-ticket-actions">
+            <button className="primary-button" disabled={isSubmitting} type="submit">
+              {isSubmitting ? 'Reabriendo...' : 'Confirmar reapertura'}
+            </button>
+            <button
+              className="secondary-button"
+              disabled={isSubmitting}
+              onClick={() => setIsReopening(false)}
+              type="button"
+            >
+              Cancelar
+            </button>
+          </div>
+
+          {error && <p className="notice error">{error}</p>}
+        </form>
+      )}
     </article>
   );
 }

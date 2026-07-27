@@ -47,9 +47,6 @@ public class HelpdeskDbContext : DbContext
                 .HasConversion<string>()
                 .HasMaxLength(20);
 
-            entity.Property(ticket => ticket.ResolutionComment)
-                .HasMaxLength(2000);
-
             entity.Property(ticket => ticket.ReopenJustification)
                 .HasMaxLength(2000);
 

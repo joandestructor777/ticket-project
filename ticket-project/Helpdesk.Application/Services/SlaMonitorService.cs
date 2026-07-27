@@ -1,5 +1,4 @@
 using Helpdesk.Application.Interfaces;
-using Helpdesk.Domain.Enums;
 using Helpdesk.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -8,11 +7,16 @@ namespace Helpdesk.Application.Services;
 public class SlaMonitorService : ISlaMonitorService
 {
     private readonly ITicketRepository _ticketRepository;
+    private readonly ISystemSettingRepository _systemSettingRepository;
     private readonly ILogger<SlaMonitorService> _logger;
 
-    public SlaMonitorService(ITicketRepository ticketRepository, ILogger<SlaMonitorService> logger)
+    public SlaMonitorService(
+        ITicketRepository ticketRepository,
+        ISystemSettingRepository systemSettingRepository,
+        ILogger<SlaMonitorService> logger)
     {
         _ticketRepository = ticketRepository;
+        _systemSettingRepository = systemSettingRepository;
         _logger = logger;
     }
 
@@ -28,7 +32,7 @@ public class SlaMonitorService : ISlaMonitorService
         {
             _logger.LogWarning("Ticket ID {Id} superó la fecha límite {Sla}. Marcando como vencido...", ticket.Id, ticket.LimitDateSLA);
 
-            ticket.MarkAsDefeated("El tiempo límite de resolución asignado por SLA ha expirado.");
+            ticket.MarkAsExpired("El tiempo límite de resolución asignado por SLA ha expirado.");
 
             await _ticketRepository.UpdateAsync(ticket);
             processedCount++;
@@ -43,12 +47,13 @@ public class SlaMonitorService : ISlaMonitorService
     public async Task ProcessGracePeriodTicketsAsync()
     {
         var now = DateTime.UtcNow;
-        var gracePeriodStr = await _ticketRepository.GetSystemSettingAsync("GracePeriodHours") ?? "48";
-        if (!int.TryParse(gracePeriodStr, out int gracePeriodHours))
-            gracePeriodHours = 48;
+        var setting = await _systemSettingRepository.GetByKeyAsync("GracePeriodHours");
+        var gracePeriodHours = int.TryParse(setting?.Value, out var configuredHours) && configuredHours > 0
+            ? configuredHours
+            : 48;
 
         var limitTime = now.AddHours(-gracePeriodHours);
-        
+
         _logger.LogInformation("Consultando tickets resueltos que superaron el plazo de gracia de {Horas}h (Límite: {Limite} UTC)", gracePeriodHours, limitTime);
 
         var pastGracePeriodTickets = await _ticketRepository.GetResolvedTicketsPastGracePeriodAsync(limitTime);
@@ -57,7 +62,7 @@ public class SlaMonitorService : ISlaMonitorService
         foreach (var ticket in pastGracePeriodTickets)
         {
             _logger.LogInformation("Ticket ID {Id} superó el plazo de gracia. Cerrando definitivamente...", ticket.Id);
-            ticket.State = TicketState.Closed;
+            ticket.CloseAfterGracePeriod();
             await _ticketRepository.UpdateAsync(ticket);
             processedCount++;
         }

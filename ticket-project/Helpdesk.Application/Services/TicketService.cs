@@ -8,32 +8,35 @@ namespace Helpdesk.Application.Services;
 public sealed class TicketService : ITicketService
 {
     private readonly ITicketRepository _ticketRepository;
+    private readonly ISystemSettingRepository _systemSettingRepository;
 
-    public TicketService(ITicketRepository ticketRepository) => _ticketRepository = ticketRepository;
+    public TicketService(
+        ITicketRepository ticketRepository,
+        ISystemSettingRepository systemSettingRepository)
+    {
+        _ticketRepository = ticketRepository;
+        _systemSettingRepository = systemSettingRepository;
+    }
 
     public Task<IReadOnlyList<Ticket>> GetAllTicketsAsync(CancellationToken cancellationToken = default) =>
         _ticketRepository.GetAllAsync(cancellationToken);
 
     public async Task<Ticket> ReopenTicketAsync(Guid ticketId, string justification, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(justification))
-            throw new ArgumentException("La justificación de reapertura es obligatoria.");
-
         var ticket = await GetTicketAsync(ticketId, cancellationToken);
+
         if (ticket.State != TicketState.Resolved)
             throw new InvalidOperationException("Solo se pueden reabrir tickets resueltos.");
 
         var gracePeriodHours = await GetGracePeriodHoursAsync(cancellationToken);
         if (ticket.ResolutionDate is null || DateTime.UtcNow > ticket.ResolutionDate.Value.AddHours(gracePeriodHours))
         {
-            ticket.State = TicketState.Closed;
+            ticket.CloseAfterGracePeriod();
             await _ticketRepository.UpdateAsync(ticket);
             throw new InvalidOperationException("El plazo de gracia expiró; el ticket fue cerrado definitivamente.");
         }
 
-        ticket.State = TicketState.Reopened;
-        ticket.ReopenJustification = justification.Trim();
-        ticket.ResolutionDate = null;
+        ticket.Reopen(justification);
 
         await _ticketRepository.UpdateAsync(ticket);
         return ticket;
@@ -45,7 +48,12 @@ public sealed class TicketService : ITicketService
 
     private async Task<int> GetGracePeriodHoursAsync(CancellationToken cancellationToken)
     {
-        var configuredValue = await _ticketRepository.GetSystemSettingAsync("GracePeriodHours", cancellationToken);
-        return int.TryParse(configuredValue, out var hours) && hours > 0 ? hours : 48;
+        var setting = await _systemSettingRepository.GetByKeyAsync(
+            "GracePeriodHours",
+            cancellationToken);
+
+        return int.TryParse(setting?.Value, out var hours) && hours > 0
+            ? hours
+            : 48;
     }
 }

@@ -62,12 +62,9 @@ public sealed class TicketRepository : ITicketRepository
     public async Task<IEnumerable<Ticket>> GetResolvedTicketsPastGracePeriodAsync(DateTime limitTime) =>
         await _context.Tickets.Where(ticket => ticket.State == TicketState.Resolved && ticket.ResolutionDate != null && ticket.ResolutionDate < limitTime).ToListAsync();
 
-    public async Task<string?> GetSystemSettingAsync(string key, CancellationToken cancellationToken = default) =>
-        await _context.SystemSettings.Where(setting => setting.Key == key).Select(setting => setting.Value).SingleOrDefaultAsync(cancellationToken);
-
     public async Task UpdateAsync(
-    Ticket ticket,
-    CancellationToken cancellationToken = default)
+        Ticket ticket,
+        CancellationToken cancellationToken = default)
     {
         await _context.SaveChangesAsync(cancellationToken);
     }

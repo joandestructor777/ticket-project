@@ -4,6 +4,13 @@
 
 .app-header { background: #fff; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; padding: 16px max(20px, calc((100% - 1120px) / 2)); font-weight: 700; }
 .app-header span:last-child { color: var(--primary); font-size: .9rem; }
+.portal-overview { align-items: center; display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; margin-bottom: 24px; }
+.portal-overview h2 { color: var(--text-main); font-size: 1.5rem; margin: 0 0 4px; }
+.portal-overview p { color: var(--text-muted); margin: 0; }
+.portal-navigation { display: flex; flex-wrap: wrap; gap: 10px; }
+.portal-navigation-button { background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-main); cursor: pointer; font: inherit; font-size: .85rem; font-weight: 600; padding: 8px 16px; }
+.portal-navigation-button:hover { border-color: var(--primary); }
+.portal-navigation-button-active { background: var(--primary); border-color: var(--primary); color: #ffffff; }
 .client-dashboard { max-width: 1120px; margin: 0 auto; padding: 44px 20px; text-align: left; }
 .client-intro { display: flex; justify-content: space-between; gap: 24px; align-items: end; margin-bottom: 30px; }
 .eyebrow { color: var(--primary); font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
@@ -14,7 +21,14 @@
 .ticket-form input, .ticket-form textarea, .ticket-form select { background: #fff; border: 1px solid var(--border-color); border-radius: 6px; display: block; font: inherit; margin-top: 6px; padding: 10px; resize: vertical; width: 100%; }.ticket-form input:focus, .ticket-form textarea:focus, .ticket-form select:focus { border-color: var(--primary); outline: 2px solid var(--primary-light); }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }.primary-button, .secondary-button { border-radius: 6px; cursor: pointer; font-weight: 600; padding: 10px 15px; }.primary-button { background: var(--primary); border: 1px solid var(--primary); color: white; width: 100%; }.secondary-button { background: white; border: 1px solid var(--border-color); color: var(--text-main); }.primary-button:disabled, .secondary-button:disabled { cursor: wait; opacity: .65; }
 .notice { border-radius: 6px; font-size: .82rem; margin-bottom: 16px; padding: 10px 12px; }.success { background: #ecfdf5; color: #047857; }.error { background: #fef2f2; color: #b91c1c; }.empty-state { color: var(--text-muted); padding: 30px 0; text-align: center; }.client-ticket-list { display: grid; gap: 12px; }.client-ticket { border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; }.ticket-heading { align-items: start; display: flex; gap: 10px; justify-content: space-between; }.ticket-heading h3 { font-size: .94rem; }.ticket-heading time, .client-ticket small { color: var(--text-muted); font-size: .73rem; white-space: nowrap; }.client-ticket p { color: var(--text-muted); font-size: .82rem; line-height: 1.5; margin: 10px 0; }.ticket-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-@media (max-width: 760px) { .client-intro { align-items: start; flex-direction: column; }.client-layout { grid-template-columns: 1fr; }.app-header { padding: 16px 20px; } }
+.reopen-ticket-button { margin-top: 16px; }
+.reopen-ticket-form { border-top: 1px solid var(--border-color); margin-top: 16px; padding-top: 16px; }
+.reopen-ticket-form label { color: var(--text-main); display: block; font-size: .82rem; font-weight: 600; }
+.reopen-ticket-form textarea { background: #fff; border: 1px solid var(--border-color); border-radius: 6px; display: block; font: inherit; margin-top: 6px; padding: 10px; resize: vertical; width: 100%; }
+.reopen-ticket-form textarea:focus { border-color: var(--primary); outline: 2px solid var(--primary-light); }
+.reopen-ticket-actions { display: flex; gap: 10px; margin-top: 12px; }
+.reopen-ticket-actions .primary-button { width: auto; }
+@media (max-width: 760px) { .client-intro, .portal-overview { align-items: start; flex-direction: column; }.client-layout { grid-template-columns: 1fr; }.app-header { padding: 16px 20px; } }
 
 .App-logo {
   height: 40vmin;

@@ -180,7 +180,7 @@ const SupervisorDashboard = () => {
           <DashboardCharts 
             tickets={tickets.filter(t => {
               if (!dateRange.start && !dateRange.end) return true;
-              const tDate = new Date(t.fechaCreacion);
+              const tDate = new Date(t.creationDate);
               if (dateRange.start && tDate < new Date(dateRange.start)) return false;
               if (dateRange.end && tDate > new Date(dateRange.end)) return false;
               return true;
