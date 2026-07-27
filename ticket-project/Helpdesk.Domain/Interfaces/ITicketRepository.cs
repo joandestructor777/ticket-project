@@ -3,7 +3,7 @@
 namespace Helpdesk.Domain.Interfaces;
 
 public interface ITicketRepository
-{   
+{
     Task AddAsync(Ticket ticket, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Ticket>> GetAllAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Ticket>> GetByClientIdAsync(string clientId, CancellationToken cancellationToken = default);
@@ -13,6 +13,7 @@ public interface ITicketRepository
     Task<int> CountActiveTicketsByTechnicianIdAsync(Guid technicianId, CancellationToken cancellationToken = default);
     Task<IEnumerable<Ticket>> GetActiveTicketsWithExpiredSlaAsync(DateTime actualTime);
     Task<IEnumerable<Ticket>> GetResolvedTicketsPastGracePeriodAsync(DateTime limitTime);
-    Task<string?> GetSystemSettingAsync(string key, CancellationToken cancellationToken = default);
-    Task UpdateAsync(Ticket ticket);
+    Task UpdateAsync(
+        Ticket ticket,
+        CancellationToken cancellationToken = default);
 }
