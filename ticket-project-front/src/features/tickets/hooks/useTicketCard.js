@@ -1,22 +1,32 @@
 import { useState } from 'react';
 import { ticketService } from '../services/ticketService';
 
+const EXPIRED_BADGE = { label: 'SLA Vencido', bg: '#fef2f2', color: '#b91c1c', border: '#fca5a5', accent: '#ef4444' };
+const RESOLVED_BADGE = { label: 'Resuelto', bg: '#ecfdf5', color: '#047857', border: '#a7f3d0', accent: '#10b981' };
+
 const STATUS_BADGES = {
   1: { label: 'Abierto', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', accent: '#3b82f6' },
   2: { label: 'Asignado', bg: '#f5f3ff', color: '#6d28d9', border: '#ddd6fe', accent: '#8b5cf6' },
   3: { label: 'En Proceso', bg: '#fef9c3', color: '#a16207', border: '#fef08a', accent: '#eab308' },
-  4: { label: 'Resuelto', bg: '#ecfdf5', color: '#047857', border: '#a7f3d0', accent: '#10b981' },
+  4: RESOLVED_BADGE,
   5: { label: 'Cerrado', bg: '#f1f5f9', color: '#475569', border: '#cbd5e1', accent: '#64748b' },
-  6: { label: 'SLA Vencido', bg: '#fef2f2', color: '#b91c1c', border: '#fca5a5', accent: '#ef4444' },
+  6: EXPIRED_BADGE,
   7: { label: 'Reabierto', bg: '#fff7ed', color: '#c2410c', border: '#ffedd5', accent: '#f97316' },
 
   Opened: { label: 'Abierto', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', accent: '#3b82f6' },
   Assigned: { label: 'Asignado', bg: '#f5f3ff', color: '#6d28d9', border: '#ddd6fe', accent: '#8b5cf6' },
   OnProcess: { label: 'En Proceso', bg: '#fef9c3', color: '#a16207', border: '#fef08a', accent: '#eab308' },
-  Resolved: { label: 'Resuelto', bg: '#ecfdf5', color: '#047857', border: '#a7f3d0', accent: '#10b981' },
+  Resolved: RESOLVED_BADGE,
   Closed: { label: 'Cerrado', bg: '#f1f5f9', color: '#475569', border: '#cbd5e1', accent: '#64748b' },
-  Expired: { label: 'SLA Vencido', bg: '#fef2f2', color: '#b91c1c', border: '#fca5a5', accent: '#ef4444' },
-  Reopened: { label: 'Reabierto', bg: '#fff7ed', color: '#c2410c', border: '#ffedd5', accent: '#f97316' }
+  Expired: EXPIRED_BADGE,
+  Reopened: { label: 'Reabierto', bg: '#fff7ed', color: '#c2410c', border: '#ffedd5', accent: '#f97316' },
+
+  // Variaciones en minúsculas y español
+  expired: EXPIRED_BADGE,
+  vencido: EXPIRED_BADGE,
+  'sla vencido': EXPIRED_BADGE,
+  resolved: RESOLVED_BADGE,
+  resuelto: RESOLVED_BADGE
 };
 
 const PRIORITY_COLORS = {
@@ -37,11 +47,17 @@ export function useTicketCard(ticket) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  const statusConfig = STATUS_BADGES[ticket.state] || STATUS_BADGES.Opened;
-  const priorityConfig = PRIORITY_COLORS[ticket.priority] || PRIORITY_COLORS.Media;
+  const rawState = String(ticket.state || '').toLowerCase();
+  const isExpired = rawState === 'expired' || rawState === '6' || rawState.includes('vencid');
+  const isResolved = rawState === 'resolved' || rawState === '4' || rawState.includes('resuelt');
 
-  const isExpired = ticket.state === 'Expired' || ticket.state === 6 || ticket.state === '6';
-  const isResolved = ticket.state === 'Resolved' || ticket.state === 4 || ticket.state === '4';
+  const statusConfig = isExpired 
+    ? EXPIRED_BADGE 
+    : isResolved 
+      ? RESOLVED_BADGE 
+      : STATUS_BADGES[ticket.state] || STATUS_BADGES[rawState] || STATUS_BADGES.Opened;
+
+  const priorityConfig = PRIORITY_COLORS[ticket.priority] || PRIORITY_COLORS.Media;
 
   const canReopen = isResolved && ticket.resolutionDate &&
     Date.now() <= new Date(ticket.resolutionDate).getTime() + 48 * 60 * 60 * 1000;
