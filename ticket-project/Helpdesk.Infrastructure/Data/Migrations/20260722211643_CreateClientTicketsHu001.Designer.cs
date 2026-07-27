@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Helpdesk.Infrastructure.Migrations
+namespace Helpdesk.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(HelpdeskDbContext))]
-    [Migration("20260726204900_HU003_Technician")]
-    partial class HU003_Technician
+    [Migration("20260722211643_CreateClientTicketsHu001")]
+    partial class CreateClientTicketsHu001
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,51 +25,6 @@ namespace Helpdesk.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Helpdesk.Domain.Entities.SystemSetting", b =>
-                {
-                    b.Property<string>("Key")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Key");
-
-                    b.ToTable("SystemSettings");
-
-                    b.HasData(
-                        new
-                        {
-                            Key = "GracePeriodHours",
-                            Value = "48"
-                        });
-                });
-
-            modelBuilder.Entity("Helpdesk.Domain.Entities.Technician", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("MaxOpenTickets")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Specialties")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Technicians");
-                });
-
             modelBuilder.Entity("Helpdesk.Domain.Entities.Ticket", b =>
                 {
                     b.Property<Guid>("Id")
@@ -80,6 +35,11 @@ namespace Helpdesk.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("CreatedByClientId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime2");
@@ -102,19 +62,10 @@ namespace Helpdesk.Infrastructure.Migrations
                     b.Property<bool>("RegisteredExpirationAlert")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ReopenJustification")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ResolutionComment")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime?>("ResolutionDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("State")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TechnicianId")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
@@ -123,6 +74,8 @@ namespace Helpdesk.Infrastructure.Migrations
                         .HasColumnType("nvarchar(150)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByClientId", "CreationDate");
 
                     b.ToTable("Tickets");
                 });

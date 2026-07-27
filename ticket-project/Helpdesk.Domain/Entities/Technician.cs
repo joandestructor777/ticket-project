@@ -1,10 +1,11 @@
-namespace Helpdesk.Domain.Entities
+namespace Helpdesk.Domain.Entities;
+
+public sealed class Technician
 {
-    public class Technician
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Specialties { get; set; } = string.Empty; // e.g. "Hardware,Red"
-        public int MaxOpenTickets { get; set; }
-    }
+    public Guid Id { get; set; }
+    public string FullName { get; set; } = string.Empty;
+    public int MaxOpenTickets { get; set; } = 5;
+    public bool IsActive { get; set; } = true;
+    public ICollection<TechnicianSpecialty> Specialties { get; set; }
+        = new List<TechnicianSpecialty>();
 }

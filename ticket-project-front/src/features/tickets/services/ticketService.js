@@ -1,70 +1,18 @@
-const API_URL = 'http://localhost:5168/api/tickets';
-
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5168';
+async function request(path, options = {}) {
+  const response = await fetch(`${API_URL}${path}`, { ...options, headers: { 'Content-Type': 'application/json', ...options.headers } });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(payload?.message || 'No fue posible comunicarse con el servicio de tickets.');
+  return payload;
+}
+const clientRequest = (clientId, path, options = {}) => request(path, { ...options, headers: { 'X-Client-Id': clientId, ...options.headers } });
+export const clientTicketService = {
+  getMine: clientId => clientRequest(clientId, '/api/client/tickets'),
+  create: (clientId, ticket) => clientRequest(clientId, '/api/client/tickets', { method: 'POST', body: JSON.stringify(ticket) })
+};
 export const ticketService = {
-  getTickets: async () => {
-    try {
-      const response = await fetch(API_URL);
-      if (!response.ok) throw new Error('Error al obtener los tickets');
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching tickets:', error);
-      throw error;
-    }
-  },
-
-  reopenTicket: async (ticketId, justification) => {
-    try {
-      const response = await fetch(`${API_URL}/${ticketId}/reopen`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ justification })
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Error al reabrir el ticket');
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Error reopening ticket:', error);
-      throw error;
-    }
-  },
-
-  getTicketsByTechnician: async (technicianId) => {
-    const response = await fetch(`${API_URL}/technician/${technicianId}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch technician tickets');
-    }
-    return await response.json();
-  },
-
-  assignTicket: async (ticketId, technicianId) => {
-    const response = await fetch(`${API_URL}/${ticketId}/assign/${technicianId}`, {
-      method: 'PUT'
-    });
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.message || 'Error al asignar el ticket');
-    }
-    return await response.json();
-  },
-
-  updateTicketStatus: async (ticketId, stateCode, resolutionComment) => {
-    const response = await fetch(`${API_URL}/${ticketId}/status`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ state: stateCode, resolutionComment })
-    });
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.message || 'Error al actualizar el ticket');
-    }
-    return await response.json();
-  }
+  getTickets: () => request('/api/tickets'),
+  reopenTicket: (ticketId, justification) => request(`/api/tickets/${ticketId}/reopen`, { method: 'POST', body: JSON.stringify({ justification }) }),
+  getTicketsByTechnician: technicianId => request(`/api/tickets/technician/${technicianId}`),
+  updateTicketStatus: (ticketId, state, resolutionComment) => request(`/api/tickets/${ticketId}/status`, { method: 'PUT', body: JSON.stringify({ state, resolutionComment }) })
 };

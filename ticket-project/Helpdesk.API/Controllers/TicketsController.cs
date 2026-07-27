@@ -1,94 +1,42 @@
 using Helpdesk.Application.Interfaces;
+using Helpdesk.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Helpdesk.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
-public class TicketsController : ControllerBase
+[Route("api/tickets")]
+public sealed class TicketsController : ControllerBase
 {
     private readonly ITicketService _ticketService;
-
-    public TicketsController(ITicketService ticketService)
-    {
-        _ticketService = ticketService;
-    }
+    public TicketsController(ITicketService ticketService) => _ticketService = ticketService;
 
     [HttpGet]
-    public async Task<IActionResult> GetTickets()
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken) =>
+        Ok(await _ticketService.GetAllTicketsAsync(cancellationToken));
+
+    [HttpGet("technician/{technicianId:guid}")]
+    public async Task<IActionResult> GetByTechnician(Guid technicianId, CancellationToken cancellationToken) =>
+        Ok(await _ticketService.GetTicketsByTechnicianAsync(technicianId, cancellationToken));
+
+    [HttpPost("{ticketId:guid}/reopen")]
+    public async Task<IActionResult> Reopen(Guid ticketId, [FromBody] ReopenTicketRequest request, CancellationToken cancellationToken)
     {
-        try
-        {
-            var tickets = await _ticketService.GetAllTicketsAsync();
-            // Note: Returning tickets directly. In a real app we'd map to a DTO.
-            return Ok(tickets);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { error = ex.Message });
-        }
+        try { return Ok(await _ticketService.ReopenTicketAsync(ticketId, request.Justification, cancellationToken)); }
+        catch (KeyNotFoundException exception) { return NotFound(new { message = exception.Message }); }
+        catch (ArgumentException exception) { return BadRequest(new { message = exception.Message }); }
+        catch (InvalidOperationException exception) { return Conflict(new { message = exception.Message }); }
     }
 
-    [HttpPost("{id}/reopen")]
-    public async Task<IActionResult> ReopenTicket(Guid id, [FromBody] ReopenRequest request)
+    [HttpPut("{ticketId:guid}/status")]
+    public async Task<IActionResult> UpdateStatus(Guid ticketId, [FromBody] UpdateTicketStatusRequest request, CancellationToken cancellationToken)
     {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(request.Justification))
-                return BadRequest(new { error = "La justificación es requerida para reabrir un ticket." });
-
-            var ticket = await _ticketService.ReopenTicketAsync(id, request.Justification);
-            return Ok(ticket);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
-    }
-
-    [HttpPut("{id}/assign/{technicianId}")]
-    public async Task<IActionResult> AssignTicket(Guid id, int technicianId)
-    {
-        try
-        {
-            var ticket = await _ticketService.AssignTicketAsync(id, technicianId);
-            return Ok(ticket);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-    }
-
-    [HttpPut("{id}/status")]
-    public async Task<IActionResult> UpdateTicketStatus(Guid id, [FromBody] StatusUpdateRequest request)
-    {
-        try
-        {
-            var ticket = await _ticketService.UpdateTicketStatusAsync(id, request.State, request.ResolutionComment);
-            return Ok(ticket);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
-    }
-
-    [HttpGet("technician/{technicianId}")]
-    public async Task<IActionResult> GetTicketsByTechnician(int technicianId)
-    {
-        var tickets = await _ticketService.GetTicketsByTechnicianAsync(technicianId);
-        return Ok(tickets);
+        try { return Ok(await _ticketService.UpdateTicketStatusAsync(ticketId, request.State, request.ResolutionComment, cancellationToken)); }
+        catch (KeyNotFoundException exception) { return NotFound(new { message = exception.Message }); }
+        catch (ArgumentException exception) { return BadRequest(new { message = exception.Message }); }
+        catch (InvalidOperationException exception) { return Conflict(new { message = exception.Message }); }
     }
 }
 
-public class ReopenRequest
-{
-    public string Justification { get; set; } = string.Empty;
-}
-
-public class StatusUpdateRequest
-{
-    public Helpdesk.Domain.Enums.TicketState State { get; set; }
-    public string? ResolutionComment { get; set; }
-}
+public sealed record ReopenTicketRequest(string Justification);
+public sealed record UpdateTicketStatusRequest(TicketState State, string? ResolutionComment);

@@ -1,78 +1,48 @@
+using Helpdesk.API.Workers;
 using Helpdesk.Application.Interfaces;
+using Helpdesk.Application.Models;
 using Helpdesk.Application.Services;
 using Helpdesk.Domain.Interfaces;
 using Helpdesk.Infrastructure.Data;
 using Helpdesk.Infrastructure.Repositories;
-using Helpdesk.API.Workers;
 using Microsoft.EntityFrameworkCore;
-using Helpdesk.Domain.Entities;
-using Helpdesk.Domain.Enums;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddCors();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? ["http://localhost:3000"];
+builder.Services.AddCors(options => options.AddPolicy("frontend", policy => policy
+    .WithOrigins(allowedOrigins)
+    .AllowAnyHeader()
+    .AllowAnyMethod()));
 
 builder.Services.AddDbContext<HelpdeskDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
-
+builder.Services.AddScoped<ITechnicianRepository, TechnicianRepository>();
+builder.Services.AddScoped<IClientTicketService, ClientTicketService>();
+builder.Services.AddScoped<IAssignmentService, AssignmentService>();
+builder.Services.AddScoped<ITechnicianManagementService, TechnicianManagementService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<ISlaMonitorService, SlaMonitorService>();
 
+var slaOptions = builder.Configuration.GetSection(SlaOptions.SectionName).Get<SlaOptions>() ?? new SlaOptions();
+builder.Services.AddSingleton(slaOptions);
 builder.Services.AddHostedService<SlaMonitorWorker>();
 
 var app = builder.Build();
 
-// SEEDER: Crear técnicos y tickets de prueba si la base de datos está vacía
-using (var scope = app.Services.CreateScope())
+if (app.Environment.IsDevelopment())
 {
-    var context = scope.ServiceProvider.GetRequiredService<HelpdeskDbContext>();
-    
-    if (!context.Technicians.Any())
-    {
-        context.Technicians.AddRange(
-            new Technician { Name = "Carlos (Red y Hardware)", Specialties = "Red,Hardware", MaxOpenTickets = 3 },
-            new Technician { Name = "Ana (Software)", Specialties = "Software", MaxOpenTickets = 5 },
-            new Technician { Name = "Luis (Todas)", Specialties = "Hardware,Software,Red,Otro", MaxOpenTickets = 4 }
-        );
-        context.SaveChanges();
-    }
-
-    if (!context.Tickets.Any())
-    {
-        context.Tickets.AddRange(
-            new Ticket { 
-                Id = Guid.NewGuid(), Title = "Fallo de servidor central", Description = "Servidor 1 no responde", 
-                Category = "Hardware", Priority = "Crítica", State = TicketState.Opened, 
-                CreationDate = DateTime.UtcNow.AddDays(-2), LimitDateSLA = DateTime.UtcNow.AddDays(-1), TechnicianId = 1 
-            },
-            new Ticket { 
-                Id = Guid.NewGuid(), Title = "Cambio de contraseña", Description = "Usuario olvidó clave", 
-                Category = "Software", Priority = "Baja", State = TicketState.Resolved, 
-                CreationDate = DateTime.UtcNow.AddHours(-50), LimitDateSLA = DateTime.UtcNow.AddHours(-10), 
-                ResolutionDate = DateTime.UtcNow.AddHours(-49), TechnicianId = 2 
-            },
-            new Ticket { 
-                Id = Guid.NewGuid(), Title = "Problema de red", Description = "No hay internet en piso 2", 
-                Category = "Red", Priority = "Alta", State = TicketState.Expired, 
-                CreationDate = DateTime.UtcNow.AddDays(-3), LimitDateSLA = DateTime.UtcNow.AddDays(-2), TechnicianId = 1,
-                RegisteredExpirationAlert = true, LogAlert = "SLA Expirado."
-            },
-            new Ticket { 
-                Id = Guid.NewGuid(), Title = "Instalar Office", Description = "Nueva PC de gerencia", 
-                Category = "Software", Priority = "Media", State = TicketState.Closed, 
-                CreationDate = DateTime.UtcNow.AddDays(-10), LimitDateSLA = DateTime.UtcNow.AddDays(-8), 
-                ResolutionDate = DateTime.UtcNow.AddDays(-9), TechnicianId = 3 
-            }
-        );
-        context.SaveChanges();
-    }
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
-app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+app.UseCors("frontend");
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();

@@ -5,13 +5,12 @@ namespace Helpdesk.Infrastructure.Data;
 
 public class HelpdeskDbContext : DbContext
 {
-    public HelpdeskDbContext(DbContextOptions<HelpdeskDbContext> options) : base(options)
-    {
-    }
+    public HelpdeskDbContext(DbContextOptions<HelpdeskDbContext> options) : base(options) { }
 
     public DbSet<Ticket> Tickets => Set<Ticket>();
-    public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
     public DbSet<Technician> Technicians => Set<Technician>();
+    public DbSet<TechnicianSpecialty> TechnicianSpecialties => Set<TechnicianSpecialty>();
+    public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -19,18 +18,44 @@ public class HelpdeskDbContext : DbContext
 
         modelBuilder.Entity<Ticket>(entity =>
         {
-            entity.HasKey(t => t.Id);
-            entity.Property(t => t.Title).IsRequired().HasMaxLength(150);
-            entity.Property(t => t.Category).IsRequired().HasMaxLength(50);
-            entity.Property(t => t.Priority).IsRequired().HasMaxLength(50);
+            entity.HasKey(ticket => ticket.Id);
+            entity.Property(ticket => ticket.Title).IsRequired().HasMaxLength(150);
+            entity.Property(ticket => ticket.Description).IsRequired();
+            entity.Property(ticket => ticket.Category).IsRequired().HasMaxLength(50);
+            entity.Property(ticket => ticket.Priority).IsRequired().HasMaxLength(50);
+            entity.Property(ticket => ticket.CreatedByClientId).IsRequired().HasMaxLength(100);
+            entity.Property(ticket => ticket.State).HasConversion<string>().HasMaxLength(20);
+            entity.Property(ticket => ticket.ResolutionComment).HasMaxLength(2000);
+            entity.Property(ticket => ticket.ReopenJustification).HasMaxLength(2000);
+            entity.HasIndex(ticket => new { ticket.CreatedByClientId, ticket.CreationDate });
+            entity.HasOne(ticket => ticket.AssignedTechnician)
+                .WithMany()
+                .HasForeignKey(ticket => ticket.AssignedTechnicianId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(ticket => new { ticket.AssignedTechnicianId, ticket.State });
+        });
+
+        modelBuilder.Entity<Technician>(entity =>
+        {
+            entity.HasKey(technician => technician.Id);
+            entity.Property(technician => technician.FullName).IsRequired().HasMaxLength(150);
+            entity.Property(technician => technician.MaxOpenTickets).IsRequired();
+            entity.HasMany(technician => technician.Specialties)
+                .WithOne(specialty => specialty.Technician)
+                .HasForeignKey(specialty => specialty.TechnicianId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<TechnicianSpecialty>(entity =>
+        {
+            entity.HasKey(specialty => new { specialty.TechnicianId, specialty.Category });
+            entity.Property(specialty => specialty.Category).IsRequired().HasMaxLength(50);
         });
 
         modelBuilder.Entity<SystemSetting>(entity =>
         {
-            entity.HasKey(s => s.Key);
-            entity.Property(s => s.Value).IsRequired();
-            
-            // Default configuration
+            entity.HasKey(setting => setting.Key);
+            entity.Property(setting => setting.Value).IsRequired().HasMaxLength(100);
             entity.HasData(new SystemSetting { Key = "GracePeriodHours", Value = "48" });
         });
     }

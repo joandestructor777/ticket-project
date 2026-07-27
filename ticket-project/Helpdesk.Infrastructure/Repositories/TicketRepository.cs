@@ -6,78 +6,56 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Helpdesk.Infrastructure.Repositories;
 
-public class TicketRepository : ITicketRepository
+public sealed class TicketRepository : ITicketRepository
 {
     private readonly HelpdeskDbContext _context;
+    public TicketRepository(HelpdeskDbContext context) => _context = context;
 
-    public TicketRepository(HelpdeskDbContext context)
+    public async Task AddAsync(Ticket ticket, CancellationToken cancellationToken = default)
     {
-        _context = context;
+        await _context.Tickets.AddAsync(ticket, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<Ticket?> GetByIdAsync(Guid id)
-    {
-        return await _context.Tickets.FirstOrDefaultAsync(t => t.Id == id);
-    }
+    public async Task<IReadOnlyList<Ticket>> GetAllAsync(CancellationToken cancellationToken = default) =>
+        await _context.Tickets.AsNoTracking().OrderByDescending(ticket => ticket.CreationDate).ToListAsync(cancellationToken);
 
-    public async Task<IEnumerable<Ticket>> GetAllAsync()
+    public async Task<IReadOnlyList<Ticket>> GetByClientIdAsync(string clientId, CancellationToken cancellationToken = default) =>
+        await _context.Tickets.AsNoTracking().Where(ticket => ticket.CreatedByClientId == clientId)
+            .OrderByDescending(ticket => ticket.CreationDate).ToListAsync(cancellationToken);
+
+    public async Task<Ticket?> GetByIdAsync(Guid ticketId, CancellationToken cancellationToken = default) =>
+        await _context.Tickets.SingleOrDefaultAsync(ticket => ticket.Id == ticketId, cancellationToken);
+
+    public async Task<IReadOnlyList<Ticket>> GetOpenTicketsAsync(CancellationToken cancellationToken = default) =>
+        await _context.Tickets.AsNoTracking().Where(ticket => ticket.State == TicketState.Opened)
+            .OrderBy(ticket => ticket.CreationDate).ToListAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<Ticket>> GetByTechnicianIdAsync(Guid technicianId, CancellationToken cancellationToken = default) =>
+        await _context.Tickets.AsNoTracking().Where(ticket => ticket.AssignedTechnicianId == technicianId)
+            .OrderByDescending(ticket => ticket.CreationDate).ToListAsync(cancellationToken);
+
+    public async Task<int> CountActiveTicketsByTechnicianIdAsync(Guid technicianId, CancellationToken cancellationToken = default)
     {
-        return await _context.Tickets.ToListAsync();
+        var activeStates = new[] { TicketState.Assigned, TicketState.OnProcess, TicketState.Reopened, TicketState.Expired };
+        return await _context.Tickets.CountAsync(ticket => ticket.AssignedTechnicianId == technicianId && activeStates.Contains(ticket.State), cancellationToken);
     }
 
     public async Task<IEnumerable<Ticket>> GetActiveTicketsWithExpiredSlaAsync(DateTime actualTime)
     {
-        var monitorizedStates = new[]
-        {
-            TicketState.Opened,
-            TicketState.Assigned,
-            TicketState.OnProcess,
-            TicketState.Reopened
-        };
-
-        return await _context.Tickets
-            .Where(t => monitorizedStates.Contains(t.State)
-                        && t.LimitDateSLA < actualTime)
-            .ToListAsync();
+        var monitoredStates = new[] { TicketState.Opened, TicketState.Assigned, TicketState.OnProcess, TicketState.Reopened };
+        return await _context.Tickets.Where(ticket => monitoredStates.Contains(ticket.State) && ticket.LimitDateSLA < actualTime).ToListAsync();
     }
 
-    public async Task<IEnumerable<Ticket>> GetResolvedTicketsPastGracePeriodAsync(DateTime limitTime)
-    {
-        return await _context.Tickets
-            .Where(t => t.State == TicketState.Resolved 
-                        && t.ResolutionDate.HasValue 
-                        && t.ResolutionDate.Value < limitTime)
-            .ToListAsync();
-    }
+    public async Task<IEnumerable<Ticket>> GetResolvedTicketsPastGracePeriodAsync(DateTime limitTime) =>
+        await _context.Tickets.Where(ticket => ticket.State == TicketState.Resolved && ticket.ResolutionDate != null && ticket.ResolutionDate < limitTime).ToListAsync();
 
-    public async Task<string?> GetSystemSettingAsync(string key)
-    {
-        var setting = await _context.SystemSettings.FirstOrDefaultAsync(s => s.Key == key);
-        return setting?.Value;
-    }
+    public async Task<string?> GetSystemSettingAsync(string key, CancellationToken cancellationToken = default) =>
+        await _context.SystemSettings.Where(setting => setting.Key == key).Select(setting => setting.Value).SingleOrDefaultAsync(cancellationToken);
 
     public async Task UpdateAsync(Ticket ticket)
     {
         _context.Tickets.Update(ticket);
         await _context.SaveChangesAsync();
-    }
-
-    public async Task<Technician?> GetTechnicianByIdAsync(int id)
-    {
-        return await _context.Technicians.FirstOrDefaultAsync(t => t.Id == id);
-    }
-
-    public async Task<IEnumerable<Ticket>> GetTicketsByTechnicianIdAsync(int technicianId)
-    {
-        return await _context.Tickets
-            .Where(t => t.TechnicianId == technicianId)
-            .ToListAsync();
-    }
-
-    public async Task<int> GetOpenTicketsCountByTechnicianAsync(int technicianId)
-    {
-        var activeStates = new[] { TicketState.Opened, TicketState.Assigned, TicketState.OnProcess, TicketState.Reopened };
-        return await _context.Tickets
-            .CountAsync(t => t.TechnicianId == technicianId && activeStates.Contains(t.State));
     }
 }
