@@ -142,8 +142,8 @@ export default function DashboardCharts({ tickets }) {
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      <span style={{ color: '#059669', fontWeight: '500' }}>✓ {values.resolved} resueltos</span>
-                      <span style={{ color: '#dc2626', fontWeight: '500' }}>⚠ {values.expired} vencidos</span>
+                      <span style={{ color: '#059669', fontWeight: '500' }}>{values.resolved} resueltos</span>
+                      <span style={{ color: '#dc2626', fontWeight: '500' }}>{values.expired} vencidos</span>
                     </div>
                   </div>
                 );

@@ -2,29 +2,29 @@ import React, { useState } from 'react';
 import { ticketService } from '../services/ticketService';
 
 const STATUS_BADGES = {
-  1: { label: 'Abierto', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', accent: '#3b82f6', icon: '🔵' },
-  2: { label: 'Asignado', bg: '#f5f3ff', color: '#6d28d9', border: '#ddd6fe', accent: '#8b5cf6', icon: '👤' },
-  3: { label: 'En Proceso', bg: '#fef9c3', color: '#a16207', border: '#fef08a', accent: '#eab308', icon: '⚡' },
-  4: { label: 'Resuelto', bg: '#ecfdf5', color: '#047857', border: '#a7f3d0', accent: '#10b981', icon: '✅' },
-  5: { label: 'Cerrado', bg: '#f1f5f9', color: '#475569', border: '#cbd5e1', accent: '#64748b', icon: '🔒' },
-  6: { label: 'SLA Vencido', bg: '#fef2f2', color: '#b91c1c', border: '#fca5a5', accent: '#ef4444', icon: '🚨' },
-  7: { label: 'Reabierto', bg: '#fff7ed', color: '#c2410c', border: '#ffedd5', accent: '#f97316', icon: '🔄' },
+  1: { label: 'Abierto', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', accent: '#3b82f6' },
+  2: { label: 'Asignado', bg: '#f5f3ff', color: '#6d28d9', border: '#ddd6fe', accent: '#8b5cf6' },
+  3: { label: 'En Proceso', bg: '#fef9c3', color: '#a16207', border: '#fef08a', accent: '#eab308' },
+  4: { label: 'Resuelto', bg: '#ecfdf5', color: '#047857', border: '#a7f3d0', accent: '#10b981' },
+  5: { label: 'Cerrado', bg: '#f1f5f9', color: '#475569', border: '#cbd5e1', accent: '#64748b' },
+  6: { label: 'SLA Vencido', bg: '#fef2f2', color: '#b91c1c', border: '#fca5a5', accent: '#ef4444' },
+  7: { label: 'Reabierto', bg: '#fff7ed', color: '#c2410c', border: '#ffedd5', accent: '#f97316' },
 
-  '1': { label: 'Abierto', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', accent: '#3b82f6', icon: '🔵' },
-  '2': { label: 'Asignado', bg: '#f5f3ff', color: '#6d28d9', border: '#ddd6fe', accent: '#8b5cf6', icon: '👤' },
-  '3': { label: 'En Proceso', bg: '#fef9c3', color: '#a16207', border: '#fef08a', accent: '#eab308', icon: '⚡' },
-  '4': { label: 'Resuelto', bg: '#ecfdf5', color: '#047857', border: '#a7f3d0', accent: '#10b981', icon: '✅' },
-  '5': { label: 'Cerrado', bg: '#f1f5f9', color: '#475569', border: '#cbd5e1', accent: '#64748b', icon: '🔒' },
-  '6': { label: 'SLA Vencido', bg: '#fef2f2', color: '#b91c1c', border: '#fca5a5', accent: '#ef4444', icon: '🚨' },
-  '7': { label: 'Reabierto', bg: '#fff7ed', color: '#c2410c', border: '#ffedd5', accent: '#f97316', icon: '🔄' },
+  '1': { label: 'Abierto', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', accent: '#3b82f6' },
+  '2': { label: 'Asignado', bg: '#f5f3ff', color: '#6d28d9', border: '#ddd6fe', accent: '#8b5cf6' },
+  '3': { label: 'En Proceso', bg: '#fef9c3', color: '#a16207', border: '#fef08a', accent: '#eab308' },
+  '4': { label: 'Resuelto', bg: '#ecfdf5', color: '#047857', border: '#a7f3d0', accent: '#10b981' },
+  '5': { label: 'Cerrado', bg: '#f1f5f9', color: '#475569', border: '#cbd5e1', accent: '#64748b' },
+  '6': { label: 'SLA Vencido', bg: '#fef2f2', color: '#b91c1c', border: '#fca5a5', accent: '#ef4444' },
+  '7': { label: 'Reabierto', bg: '#fff7ed', color: '#c2410c', border: '#ffedd5', accent: '#f97316' },
 
-  Opened: { label: 'Abierto', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', accent: '#3b82f6', icon: '🔵' },
-  Assigned: { label: 'Asignado', bg: '#f5f3ff', color: '#6d28d9', border: '#ddd6fe', accent: '#8b5cf6', icon: '👤' },
-  OnProcess: { label: 'En Proceso', bg: '#fef9c3', color: '#a16207', border: '#fef08a', accent: '#eab308', icon: '⚡' },
-  Resolved: { label: 'Resuelto', bg: '#ecfdf5', color: '#047857', border: '#a7f3d0', accent: '#10b981', icon: '✅' },
-  Closed: { label: 'Cerrado', bg: '#f1f5f9', color: '#475569', border: '#cbd5e1', accent: '#64748b', icon: '🔒' },
-  Expired: { label: 'SLA Vencido', bg: '#fef2f2', color: '#b91c1c', border: '#fca5a5', accent: '#ef4444', icon: '🚨' },
-  Reopened: { label: 'Reabierto', bg: '#fff7ed', color: '#c2410c', border: '#ffedd5', accent: '#f97316', icon: '🔄' }
+  Opened: { label: 'Abierto', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe', accent: '#3b82f6' },
+  Assigned: { label: 'Asignado', bg: '#f5f3ff', color: '#6d28d9', border: '#ddd6fe', accent: '#8b5cf6' },
+  OnProcess: { label: 'En Proceso', bg: '#fef9c3', color: '#a16207', border: '#fef08a', accent: '#eab308' },
+  Resolved: { label: 'Resuelto', bg: '#ecfdf5', color: '#047857', border: '#a7f3d0', accent: '#10b981' },
+  Closed: { label: 'Cerrado', bg: '#f1f5f9', color: '#475569', border: '#cbd5e1', accent: '#64748b' },
+  Expired: { label: 'SLA Vencido', bg: '#fef2f2', color: '#b91c1c', border: '#fca5a5', accent: '#ef4444' },
+  Reopened: { label: 'Reabierto', bg: '#fff7ed', color: '#c2410c', border: '#ffedd5', accent: '#f97316' }
 };
 
 const PRIORITY_COLORS = {
@@ -32,13 +32,6 @@ const PRIORITY_COLORS = {
   Media: { color: '#d97706', bg: '#fef3c7', border: '#fde68a' },
   Alta: { color: '#ea580c', bg: '#ffedd5', border: '#fed7aa' },
   Crítica: { color: '#dc2626', bg: '#fee2e2', border: '#fca5a5' }
-};
-
-const CATEGORY_ICONS = {
-  Hardware: '💻',
-  Software: '⚙️',
-  Red: '🌐',
-  Otro: '📦'
 };
 
 const formatDate = (value) => value
@@ -54,7 +47,6 @@ export default function TicketCard({ ticket }) {
 
   const statusConfig = STATUS_BADGES[ticket.state] || STATUS_BADGES.Opened;
   const priorityConfig = PRIORITY_COLORS[ticket.priority] || PRIORITY_COLORS.Media;
-  const categoryIcon = CATEGORY_ICONS[ticket.category] || '📁';
 
   const isExpired = ticket.state === 'Expired' || ticket.state === 6 || ticket.state === '6';
   const isResolved = ticket.state === 'Resolved' || ticket.state === 4 || ticket.state === '4';
@@ -90,7 +82,7 @@ export default function TicketCard({ ticket }) {
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',
+        justify: 'space-between',
         boxShadow: isHovered
           ? '0 12px 24px -6px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04)'
           : '0 2px 4px -1px rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02)',
@@ -114,12 +106,8 @@ export default function TicketCard({ ticket }) {
             padding: '4px 12px',
             borderRadius: '20px',
             fontSize: '0.75rem',
-            fontWeight: '600',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px'
+            fontWeight: '600'
           }}>
-            <span>{statusConfig.icon}</span>
             {statusConfig.label}
           </span>
 
@@ -169,7 +157,7 @@ export default function TicketCard({ ticket }) {
             fontSize: '0.75rem',
             fontWeight: '500'
           }}>
-            {categoryIcon} {ticket.category}
+            Categoría: {ticket.category}
           </span>
 
           {ticket.assignedTechnicianId && (
@@ -182,7 +170,7 @@ export default function TicketCard({ ticket }) {
               fontSize: '0.75rem',
               fontWeight: '500'
             }}>
-              👤 Técnico: {String(ticket.assignedTechnicianId).slice(0, 8)}
+              Técnico: {String(ticket.assignedTechnicianId).slice(0, 8)}
             </span>
           )}
         </div>
@@ -197,7 +185,7 @@ export default function TicketCard({ ticket }) {
             fontSize: '0.8rem',
             color: '#047857'
           }}>
-            <strong style={{ display: 'block', marginBottom: '2px' }}>✓ Solución Aplicada:</strong>
+            <strong style={{ display: 'block', marginBottom: '2px' }}>Solución Aplicada:</strong>
             {ticket.resolutionComment}
           </div>
         )}
@@ -212,7 +200,7 @@ export default function TicketCard({ ticket }) {
             fontSize: '0.8rem',
             color: '#c2410c'
           }}>
-            <strong style={{ display: 'block', marginBottom: '2px' }}>🔄 Justificación de Reapertura:</strong>
+            <strong style={{ display: 'block', marginBottom: '2px' }}>Justificación de Reapertura:</strong>
             {ticket.reopenJustification}
           </div>
         )}
@@ -228,7 +216,7 @@ export default function TicketCard({ ticket }) {
             color: '#b91c1c',
             fontWeight: '500'
           }}>
-            <strong>🚨 Alerta SLA Vencido:</strong> {ticket.logAlert || 'El tiempo de atención asignado ha expirado sin resolución.'}
+            <strong>Alerta SLA Vencido:</strong> {ticket.logAlert || 'El tiempo de atención asignado ha expirado sin resolución.'}
           </div>
         )}
       </div>
@@ -246,12 +234,12 @@ export default function TicketCard({ ticket }) {
           color: 'var(--text-muted)',
           marginBottom: canReopen ? '12px' : '0'
         }}>
-          <span>📅 Creado: {formatDate(ticket.creationDate || ticket.fechaCreacion)}</span>
+          <span>Creado: {formatDate(ticket.creationDate || ticket.fechaCreacion)}</span>
           <span style={{
             color: isExpired ? '#dc2626' : 'var(--text-main)',
             fontWeight: '600'
           }}>
-            ⏳ SLA: {formatDate(ticket.limitDateSLA || ticket.limitDateSla)}
+            Límite SLA: {formatDate(ticket.limitDateSLA || ticket.limitDateSla)}
           </span>
         </div>
 
@@ -271,7 +259,7 @@ export default function TicketCard({ ticket }) {
               transition: 'all 0.15s ease'
             }}
           >
-            🔄 Reabrir Ticket (Periodo de Gracia)
+            Reabrir Ticket (Periodo de Gracia)
           </button>
         )}
 
