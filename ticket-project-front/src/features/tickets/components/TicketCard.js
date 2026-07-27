@@ -45,7 +45,7 @@ const TicketCard = ({ ticket }) => {
             <span>SLA VENCIDO</span>
           </div>
           <span style={{ fontSize: '0.7rem', fontWeight: '500' }}>
-            Límite: {formatDate(ticket.fechaLimiteSLA)}
+            Límite: {formatDate(ticket.limitDateSla)}
           </span>
         </div>
       )}

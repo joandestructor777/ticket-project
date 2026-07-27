@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Helpdesk.Infrastructure.Repositories;
 
-public class TicketRepository : ITicketRepository
+public sealed class TicketRepository : ITicketRepository
 {
     private readonly HelpdeskDbContext _context;
 
@@ -15,9 +15,65 @@ public class TicketRepository : ITicketRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Ticket>> GetActiveTicketsWithExpiredSlaAsync(DateTime actualTime)
+    public async Task AddAsync(
+        Ticket ticket,
+        CancellationToken cancellationToken = default)
     {
-        var monitorizedStates = new[]
+        await _context.Tickets.AddAsync(ticket, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Ticket>> GetByClientIdAsync(
+        string clientId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Tickets
+            .AsNoTracking()
+            .Where(ticket => ticket.CreatedByClientId == clientId)
+            .OrderByDescending(ticket => ticket.CreationDate)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<Ticket?> GetByIdAsync(
+        Guid ticketId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Tickets
+            .SingleOrDefaultAsync(ticket => ticket.Id == ticketId, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Ticket>> GetOpenTicketsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Tickets
+            .AsNoTracking()
+            .Where(ticket => ticket.State == TicketState.Opened)
+            .OrderByDescending(ticket => ticket.CreationDate)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> CountActiveTicketsByTechnicianIdAsync(
+        Guid technicianId,
+        CancellationToken cancellationToken = default)
+    {
+        var activeStates = new[]
+        {
+            TicketState.Assigned,
+            TicketState.OnProcess,
+            TicketState.Reopened,
+            TicketState.Expired
+        };
+
+        return await _context.Tickets.CountAsync(ticket =>
+            ticket.AssignedTechnicianId == technicianId &&
+            activeStates.Contains(ticket.State),
+            cancellationToken);
+    }
+
+    public async Task<IEnumerable<Ticket>> GetActiveTicketsWithExpiredSlaAsync(
+        DateTime actualTime)
+    {
+        var monitoredStates = new[]
         {
             TicketState.Opened,
             TicketState.Assigned,
@@ -26,24 +82,10 @@ public class TicketRepository : ITicketRepository
         };
 
         return await _context.Tickets
-            .Where(t => monitorizedStates.Contains(t.State)
-                        && t.LimitDateSLA < actualTime)
+            .Where(ticket =>
+                monitoredStates.Contains(ticket.State) &&
+                ticket.LimitDateSLA < actualTime)
             .ToListAsync();
-    }
-
-    public async Task AddAsync(Ticket ticket, CancellationToken cancellationToken = default)
-    {
-        await _context.Tickets.AddAsync(ticket, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task<IReadOnlyList<Ticket>> GetByClientIdAsync(string clientId, CancellationToken cancellationToken = default)
-    {
-        return await _context.Tickets
-            .AsNoTracking()
-            .Where(ticket => ticket.CreatedByClientId == clientId)
-            .OrderByDescending(ticket => ticket.CreationDate)
-            .ToListAsync(cancellationToken);
     }
 
     public async Task UpdateAsync(Ticket ticket)

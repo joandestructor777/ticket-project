@@ -3,21 +3,12 @@ using Helpdesk.Application.Models;
 using Helpdesk.Domain.Entities;
 using Helpdesk.Domain.Enums;
 using Helpdesk.Domain.Interfaces;
+using Helpdesk.Domain.Support;
 
 namespace Helpdesk.Application.Services;
 
 public sealed class ClientTicketService : IClientTicketService
 {
-    private static readonly HashSet<string> ValidCategories = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "Hardware", "Software", "Red", "Otro"
-    };
-
-    private static readonly HashSet<string> ValidPriorities = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "Baja", "Media", "Alta", "Crítica"
-    };
-
     private readonly ITicketRepository _tickets;
     private readonly SlaOptions _slaOptions;
 
@@ -32,8 +23,8 @@ public sealed class ClientTicketService : IClientTicketService
         ValidateClientId(clientId);
         Validate(command);
 
-        var category = Normalize(command.Category);
-        var priority = Normalize(command.Priority);
+        SupportCatalog.TryNormalizeCategory(command.Category, out var category);
+        SupportCatalog.TryNormalizePriority(command.Priority, out var priority);
         var createdAt = DateTime.UtcNow;
         var slaHours = GetSlaHours(category, priority);
         var ticket = new Ticket
@@ -74,9 +65,9 @@ public sealed class ClientTicketService : IClientTicketService
             throw new ArgumentException("El título es obligatorio y debe tener máximo 150 caracteres.");
         if (string.IsNullOrWhiteSpace(command.Description) || command.Description.Trim().Length > 2000)
             throw new ArgumentException("La descripción es obligatoria y debe tener máximo 2000 caracteres.");
-        if (!ValidCategories.Contains(command.Category ?? string.Empty))
+        if (!SupportCatalog.TryNormalizeCategory(command.Category, out _))
             throw new ArgumentException("La categoría seleccionada no es válida.");
-        if (!ValidPriorities.Contains(command.Priority ?? string.Empty))
+        if (!SupportCatalog.TryNormalizePriority(command.Priority, out _))
             throw new ArgumentException("La prioridad seleccionada no es válida.");
     }
 
@@ -85,16 +76,4 @@ public sealed class ClientTicketService : IClientTicketService
         if (string.IsNullOrWhiteSpace(clientId) || clientId.Length > 100)
             throw new ArgumentException("El identificador del cliente no es válido.");
     }
-
-    private static string Normalize(string value) => value.Trim() switch
-    {
-        var item when item.Equals("hardware", StringComparison.OrdinalIgnoreCase) => "Hardware",
-        var item when item.Equals("software", StringComparison.OrdinalIgnoreCase) => "Software",
-        var item when item.Equals("red", StringComparison.OrdinalIgnoreCase) => "Red",
-        var item when item.Equals("otro", StringComparison.OrdinalIgnoreCase) => "Otro",
-        var item when item.Equals("baja", StringComparison.OrdinalIgnoreCase) => "Baja",
-        var item when item.Equals("media", StringComparison.OrdinalIgnoreCase) => "Media",
-        var item when item.Equals("alta", StringComparison.OrdinalIgnoreCase) => "Alta",
-        _ => "Crítica"
-    };
 }

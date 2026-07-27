@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { clientTicketService } from '../../tickets/services/ticketService';
 import Badge from '../../../shared/components/Badge';
 import { TICKET_PRIORITIES, TICKET_STATUS } from '../../../shared/constants/ticketStatus';
@@ -19,8 +19,23 @@ export default function ClientDashboard() {
     sessionStorage.setItem(storageKey, generatedId);
     return generatedId;
   }, []);
-  const loadTickets = async () => { try { setLoading(true); setError(''); setTickets(await clientTicketService.getMine(clientId)); } catch (e) { setError(e.message); } finally { setLoading(false); } };
-  useEffect(() => { loadTickets(); }, []);
+  const loadTickets = useCallback(async () => {
+  try {
+    setLoading(true);
+    setError('');
+
+    const clientTickets = await clientTicketService.getMine(clientId);
+
+    setTickets(clientTickets);
+  } catch (exception) {
+    setError(exception.message);
+  } finally {
+    setLoading(false);
+  }
+}, [clientId]);
+  useEffect(() => {
+  loadTickets();
+}, [loadTickets]);
   const handleChange = ({ target }) => setForm((current) => ({ ...current, [target.name]: target.value }));
   const handleSubmit = async (event) => {
     event.preventDefault(); if (submitting) return;

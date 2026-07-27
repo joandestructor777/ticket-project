@@ -22,6 +22,9 @@ builder.Services.AddDbContext<HelpdeskDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+builder.Services.AddScoped<ITechnicianRepository, TechnicianRepository>();
+builder.Services.AddScoped<IAssignmentService, AssignmentService>();
+builder.Services.AddScoped<ITechnicianManagementService, TechnicianManagementService>();
 var slaOptions = builder.Configuration.GetSection(SlaOptions.SectionName).Get<SlaOptions>() ?? new SlaOptions();
 builder.Services.AddSingleton(slaOptions);
 builder.Services.AddScoped<IClientTicketService, ClientTicketService>();
