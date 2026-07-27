@@ -24,7 +24,7 @@ public class HelpdeskDbContext : DbContext
             entity.Property(ticket => ticket.Category).IsRequired().HasMaxLength(50);
             entity.Property(ticket => ticket.Priority).IsRequired().HasMaxLength(50);
             entity.Property(ticket => ticket.CreatedByClientId).IsRequired().HasMaxLength(100);
-            entity.Property(ticket => ticket.State).HasConversion<string>().HasMaxLength(20);
+            entity.Property(ticket => ticket.State).IsRequired();
             entity.Property(ticket => ticket.ResolutionComment).HasMaxLength(2000);
             entity.Property(ticket => ticket.ReopenJustification).HasMaxLength(2000);
             entity.HasIndex(ticket => new { ticket.CreatedByClientId, ticket.CreationDate });
