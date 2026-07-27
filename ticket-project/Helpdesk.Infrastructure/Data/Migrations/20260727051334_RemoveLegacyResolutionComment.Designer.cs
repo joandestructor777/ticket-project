@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Helpdesk.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(HelpdeskDbContext))]
-    [Migration("20260727021300_FixStateEnumMapping")]
-    partial class FixStateEnumMapping
+    [Migration("20260727051334_RemoveLegacyResolutionComment")]
+    partial class RemoveLegacyResolutionComment
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -127,15 +127,19 @@ namespace Helpdesk.Infrastructure.Data.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
-                    b.Property<string>("ResolutionComment")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
                     b.Property<DateTime?>("ResolutionDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("State")
-                        .HasColumnType("int");
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -149,6 +153,38 @@ namespace Helpdesk.Infrastructure.Data.Migrations
                     b.HasIndex("CreatedByClientId", "CreationDate");
 
                     b.ToTable("Tickets");
+                });
+
+            modelBuilder.Entity("Helpdesk.Domain.Entities.TicketComment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsResolution")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("TechnicianId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TicketId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TechnicianId");
+
+                    b.HasIndex("TicketId", "CreatedAt");
+
+                    b.ToTable("TicketComments");
                 });
 
             modelBuilder.Entity("Helpdesk.Domain.Entities.TechnicianSpecialty", b =>
@@ -172,9 +208,33 @@ namespace Helpdesk.Infrastructure.Data.Migrations
                     b.Navigation("AssignedTechnician");
                 });
 
+            modelBuilder.Entity("Helpdesk.Domain.Entities.TicketComment", b =>
+                {
+                    b.HasOne("Helpdesk.Domain.Entities.Technician", "Technician")
+                        .WithMany()
+                        .HasForeignKey("TechnicianId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Helpdesk.Domain.Entities.Ticket", "Ticket")
+                        .WithMany("Comments")
+                        .HasForeignKey("TicketId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Technician");
+
+                    b.Navigation("Ticket");
+                });
+
             modelBuilder.Entity("Helpdesk.Domain.Entities.Technician", b =>
                 {
                     b.Navigation("Specialties");
+                });
+
+            modelBuilder.Entity("Helpdesk.Domain.Entities.Ticket", b =>
+                {
+                    b.Navigation("Comments");
                 });
 #pragma warning restore 612, 618
         }
